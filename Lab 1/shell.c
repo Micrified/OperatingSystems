@@ -55,12 +55,6 @@ void slice (char s[], int n, char *args[]) {
     }
 }
 
-/* Copies the environment path to the program buffer */
-void setpaths (void) {
-    char *p = getenv("PATH");
-    strncpy(paths, p, MAX_PATH);
-}
-
 int main (int argc, char *argv[]) {
     int ps, as, status, pid;
 
@@ -68,7 +62,7 @@ int main (int argc, char *argv[]) {
     if ((pid = fork()) != 0) {
         waitpid(pid, &status, 0);
     } else {
-        setpaths();
+        strncpy(paths, getenv("PATH"), MAX_PATH);
         ps = ncstr(paths, ':') + 1;
         as = ncstr(argv[1], ' ') + 1;
         slice(argv[1], as, args);
