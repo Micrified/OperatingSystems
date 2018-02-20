@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/*
+ *************************************************************************
+ *                                Ex.2                                   *
+ * Author(s):   Barnabas Busa, Joe Jones, Charles Randolph.              *
+ *************************************************************************
+*/ 
+
 #define N_MAX       50      // Counting limit (incl).
 #define P_MAX       16      // Maximum process count.
 #define D_MAX       3       // Maximum allowed digits.
