@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 #include <sys/wait.h>
 
 /*
@@ -11,11 +12,25 @@
  *************************************************************************
 */ 
 
-#define MAX_PATH    2048
-#define MAX_ARGS    100
-char path[MAX_PATH + 1];
-char paths[MAX_PATH + 1];
-char *args[MAX_ARGS + 1];
+#define DEFAULT_SIZE    255
+
+/* Path: Single env-path. Paths: Entire env-path. Args: execve param. */
+int pathSize, pathsSize, argsSize;
+char *path, *paths, **args;
+
+/* Sets the given buffer size and updates size pointer. Init if NULL. */
+void resizeBuffer (void **bp, int *sp, int n, int size) {
+    if (n <= *sp) return;
+
+    if (*bp == NULL) {
+        *bp = malloc(n * size);
+    } else {
+        *bp = realloc(*bp, n * size);
+    }
+
+    assert(*bp != NULL);
+    *sp = n;
+}
 
 /* Number of occurences of char `c` strings in string `s` */
 int ncstr (const char *s, char c) {
@@ -62,17 +77,36 @@ int main (int argc, char *argv[]) {
     // Fork: If child, transform process. Otherwise wait.
     if ((pid = fork()) != 0) {
         waitpid(pid, &status, 0);
-    } else {
-        strncpy(paths, getenv("PATH"), MAX_PATH);
+
+        // Get environment path. Save to buffer.
+        char *envp = getenv("PATH");
+        resizeBuffer((void **)&paths, &pathsSize, strlen(envp), sizeof(char));
+        strcpy(paths, envp);
+
+        // Split paths by colon. ps = number of delimited items.
         ps = ncstr(paths, ':') + 1;
+
+        // Split input in argv[1] on space. as = number of items.
         as = ncstr(argv[1], ' ') + 1;
+
+        // Allocate argument array for execve. Ensure last pointer NULL.
+        resizeBuffer((void **)&args, &argsSize, as + 1, sizeof(char *));
         slice(argv[1], as, args);
+        args[as] = NULL;
+
+        // Invoke execve for local executable.
         execve(args[0], args, NULL);
+
+        // Try executing it in all paths.
         for (int i = 0; i < ps; i++) {
-            sprintf(path, "%s/%s", nextpath(paths), args[0]);
+            char *p = nextpath(paths);
+            int len = strlen(p) + strlen(args[0]) + 2; // slash + null-char = 2.
+            resizeBuffer((void **)&path, &pathSize, len, sizeof(char));
+            sprintf(path, "%s/%s", p, args[0]);
             execve(path, args, NULL);
         }
         fprintf(stderr, "Error: Couldn't execute %s!\n", argv[1]);
+        free(path); free(paths); free(args);
         return -1;
     }
     return 0;

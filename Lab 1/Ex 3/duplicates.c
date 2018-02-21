@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/dir.h>
@@ -21,21 +22,19 @@
  ******************************************************************************
 */
 
-#define MAX_NAME                    255
 #define DEFAULT_TBL_SIZE            32
 
 #define MAX(a,b)            ((a) > (b) ? (a) : (b))
 
 /* Directory Entry: Filename and inode */
 typedef struct {
-    long index;
-    char fileName[MAX_NAME + 1];
+    char *fileName;
 } DirEntry;
 
 /* File Table Entry: Filename, size, and time modified */
 typedef struct {
     long size;
-    char fileName[MAX_NAME + 1];
+    char *fileName;
 } FileEntry;
 
 /* File Table */
@@ -43,6 +42,64 @@ FileEntry **fileTable;
 
 /* File Table pointer and size */
 int tp, tableSize;
+
+/*
+ ******************************************************************************
+ *                        Structure Managment Routines
+ ******************************************************************************
+*/
+
+/* Resizes a string if needed. String must be NULL or end with null-char! */
+void resizeString (char **bp, int size) {
+    if (*bp == NULL) {
+        *bp = malloc(size * sizeof(char));
+    } else if (strlen(*bp) < size) {
+        *bp = realloc(*bp, size * sizeof(char));
+    } else {
+        return;
+    }
+    assert(*bp != NULL);
+}
+
+/* Configures given DirEntry to accomodate new fileName. Manages memory. */
+DirEntry setDirEntry (DirEntry entry, const char *fileName) {
+    if (entry.fileName == NULL) {
+        entry.fileName = calloc(strlen(fileName) + 1, sizeof(char));
+    } else if (strlen(fileName) > strlen(entry.fileName)) {
+        entry.fileName = realloc(entry.fileName, strlen(fileName) + 1);
+    }
+    assert(entry.fileName != NULL);
+    entry.fileName = strcpy(entry.fileName, fileName);
+    return entry;
+}
+
+/* Initializes a DirEntry and allocates + sets fileName attribute. */
+DirEntry newDirEntry (const char *fileName) {
+    char *sp = calloc(strlen(fileName) + 1, sizeof(char));
+    assert(sp != NULL);
+    return (DirEntry){.fileName = strcpy(sp, fileName)};
+}
+
+/* Free's a DirEntry. Only fileName attribute should be allocated. */
+void freeDirEntry (DirEntry *dp) {
+    free(dp->fileName);
+}
+
+/* Allocates a FileEntry along with fileName attribute. */
+FileEntry *newFileEntry (const char *fileName, long size) {
+    FileEntry *fp = malloc(sizeof(FileEntry *));
+    char *sp = calloc(strlen(fileName) + 1, sizeof(char));
+    assert(fp != NULL && sp != NULL);
+    fp->fileName = strcpy(sp, fileName);
+    fp->size = size;
+    return fp;
+}
+
+/* Free's a FileEntry. Both entry and attribute should be allocated. */
+void freeFileEntry (FileEntry *fp) {
+    free(fp->fileName);
+    free(fp);
+}
 
 /*
  ******************************************************************************
@@ -96,7 +153,7 @@ void freeFileTable (void) {
         return;
     }
     for (int i = 0; i < tp; i++) {
-        free(fileTable[i]);
+        freeFileEntry(fileTable[i]);
     }
     free(fileTable);
 }
@@ -122,24 +179,14 @@ FileEntry *duplicate (const char *fileName, long fileSize) {
 
 /* Tabulates a given file in the file table */
 void tabulate (const char *fileName, long fileSize) {
-    FileEntry *fileEntry;
 
     // Reallocate the table if necessary.
     if (tp >= tableSize) {
         tableSize = MAX(DEFAULT_TBL_SIZE, tableSize * 2);
         resizeFileTable(tableSize);
     }
-
-    // Allocate a new entry and set attributes.
-    if ((fileEntry = malloc(sizeof(FileEntry))) == NULL) {
-        fprintf(stderr, "Error: Couldn't allocate a file entry!\n");
-        exit(EXIT_FAILURE);
-    } else {
-        strcpy(fileEntry->fileName, fileName);
-        fileEntry->size = fileSize;
-    }
-
-    fileTable[tp++] = fileEntry;
+    
+    fileTable[tp++] = newFileEntry(fileName, fileSize);
 }
 
 /*
@@ -151,7 +198,7 @@ void tabulate (const char *fileName, long fileSize) {
 /* Returns consecutive directory entires from a directory stream */
 DirEntry *nextDirectoryEntry (DIR *directory) {
     struct dirent *entryBuffer;
-    static DirEntry entry;
+    static DirEntry entry = (DirEntry){.fileName = NULL};
 
     // Write entries to buffer as long as more exist.
     while ((entryBuffer = readdir(directory)) != NULL) {
@@ -161,17 +208,17 @@ DirEntry *nextDirectoryEntry (DIR *directory) {
             continue;
         }
 
-        entry.index = entryBuffer->d_ino;
-        strncpy(entry.fileName, entryBuffer->d_name, MAX_NAME);
-        entry.fileName[strlen(entry.fileName)] = '\0';
+        entry = setDirEntry(entry, entryBuffer->d_name);
         return &entry;
     }
+
+    free(entry.fileName);
     return NULL;
 }
 
 /* Applies function 'f' to all valid files within given directory */
 void scanDirectory (const char *directoryName, void (*f)(const char *)) {
-    char pathName[MAX_NAME];
+    char *pathName = NULL;
     DirEntry *entry;
     DIR *directory;
 
@@ -190,14 +237,16 @@ void scanDirectory (const char *directoryName, void (*f)(const char *)) {
             continue;
         }
 
-        // If path isn't too long, append new file path to buffer and scan it.
-        if (strlen(directoryName) + strlen(fileName) + 2 > MAX_NAME) {
-            fprintf(stderr, "Error: %s filepath too long! -Ignoring-\n", fileName);
-        } else {
-            sprintf(pathName, "%s/%s", directoryName, fileName);
-            (*f)(pathName);
-        }
+        // Compute new length, resize buffer if required.
+        resizeString(&pathName, strlen(directoryName) + strlen(fileName) + 2);
+
+        // Write new path to buffer. Then scan the file.
+        sprintf(pathName, "%s/%s", directoryName, fileName);
+        (*f)(pathName);
     }
+
+    // Free memory.
+    free(pathName);
 
     // Close the directory.
     closedir(directory);
