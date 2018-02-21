@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/file.h>
 #include <dirent.h>
@@ -220,7 +221,7 @@ void scanFile (const char *fileName) {
     }
 
     // If directory, recursively apply scanFile to contents.
-    if ((statBuffer.st_mode & S_IFMT) == S_IFDIR) {
+    if (S_ISDIR(statBuffer.st_mode)) {
         scanDirectory(fileName, scanFile);
     } else {
         int fileSize = statBuffer.st_size;
