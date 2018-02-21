@@ -102,13 +102,18 @@ void freeFileTable (void) {
 
 /* Returns a pointer to a file if a duplicate exists in the file table */
 FileEntry *duplicate (const char *fileName, long fileSize) {
+    int fd1, fd2;
     for (int i = 0; i < tp; i++) {
         if (fileTable[i]->size != fileSize) {
             continue;
         }
-        if (diff(openFile(fileName), openFile(fileTable[i]->fileName))) {
+        fd1 = openFile(fileName);
+        fd2 = openFile(fileTable[i]->fileName);
+        if (diff(fd1, fd2)) {
+            close(fd1); close(fd2);
             continue;
         }
+        close(fd1); close(fd2);
         return fileTable[i];
     }
     return NULL;
