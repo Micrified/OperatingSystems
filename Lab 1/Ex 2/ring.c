@@ -57,7 +57,7 @@ int main (int argc, const char *argv[]) {
 
     // If master process, kick off the ring.
     if (getpid() == mpid) {
-        printf("PID %d: 0\n", mpid);
+        printf("pid=%d: 0\n", mpid);
         sprintf(b, "%d", 1);
         write(fds[FD_W(p, pmax)], b, D_MAX);
     }
