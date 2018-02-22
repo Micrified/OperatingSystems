@@ -70,7 +70,7 @@ int main (int argc, const char *argv[]) {
         if ((bytes_read = read(fds[FD_R(p, pmax)], b, D_MAX)) == D_MAX) {
 
             if ((n = atoi(b)) <= N_MAX) {
-                printf("PID %d: %d\n", getpid(), n);
+                printf("pid=%d: %d\n", getpid(), n);
             }
             sprintf(b, "%d", n + 1);
             write(fds[FD_W(p, pmax)], b, D_MAX);

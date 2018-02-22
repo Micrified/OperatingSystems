@@ -49,45 +49,27 @@ int tp, tableSize;
  ******************************************************************************
 */
 
-/* Resizes a string if needed. String must be NULL or end with null-char! */
-void resizeString (char **bp, int size) {
+/* Resizes a buffer if needed. Updates size pointer. Size is in bytes! */
+void resizeBuffer (void **bp, int *size_p, int toSize) {
+    if (bp == NULL || size_p == NULL) {
+        fprintf(stderr, "Error: Cannot resize NULL buffer/NULL size ptr!\n");
+        exit(EXIT_FAILURE);
+    }
     if (*bp == NULL) {
-        *bp = malloc(size * sizeof(char));
-    } else if (strlen(*bp) < size) {
-        *bp = realloc(*bp, size * sizeof(char));
+        *bp = malloc(toSize * sizeof(char));
     } else {
-        return;
+        *bp = realloc(*bp, toSize * sizeof(char));
     }
-    assert(*bp != NULL);
-}
-
-/* Configures given DirEntry to accomodate new fileName. Manages memory. */
-DirEntry setDirEntry (DirEntry entry, const char *fileName) {
-    if (entry.fileName == NULL) {
-        entry.fileName = calloc(strlen(fileName) + 1, sizeof(char));
-    } else if (strlen(fileName) > strlen(entry.fileName)) {
-        entry.fileName = realloc(entry.fileName, strlen(fileName) + 1);
+    if (*bp == NULL) {
+        fprintf(stderr, "Error: Couldn't allocate memory for buffer!\n");
+        exit(EXIT_FAILURE);
     }
-    assert(entry.fileName != NULL);
-    entry.fileName = strcpy(entry.fileName, fileName);
-    return entry;
-}
-
-/* Initializes a DirEntry and allocates + sets fileName attribute. */
-DirEntry newDirEntry (const char *fileName) {
-    char *sp = calloc(strlen(fileName) + 1, sizeof(char));
-    assert(sp != NULL);
-    return (DirEntry){.fileName = strcpy(sp, fileName)};
-}
-
-/* Free's a DirEntry. Only fileName attribute should be allocated. */
-void freeDirEntry (DirEntry *dp) {
-    free(dp->fileName);
+    *size_p = toSize;
 }
 
 /* Allocates a FileEntry along with fileName attribute. */
 FileEntry *newFileEntry (const char *fileName, long size) {
-    FileEntry *fp = malloc(sizeof(FileEntry *));
+    FileEntry *fp = malloc(sizeof(FileEntry));
     char *sp = calloc(strlen(fileName) + 1, sizeof(char));
     assert(fp != NULL && sp != NULL);
     fp->fileName = strcpy(sp, fileName);
@@ -119,8 +101,8 @@ int openFile (const char *fileName) {
 
 /* Returns nonzero if a difference exists between two given files */
 int diff (int fd1, int fd2) {
-    int r1, r2;
-    char c1, c2;
+    int r1 = 0, r2= 0;
+    char c1 = 0, c2 = 0;
     do {
         r1 = read(fd1, &c1, 1);
         r2 = read(fd2, &c2, 1);
@@ -135,16 +117,15 @@ int diff (int fd1, int fd2) {
 */
 
 /* Reallocates the file table to the given size. Initializes if required */
-void resizeFileTable (int toSize) {
+void resizeFileTable (int *size_p, int toSize) {
+    assert(size_p != NULL); 
     if (fileTable == NULL) {
         fileTable = calloc(toSize, sizeof(FileEntry *));
     } else {
         fileTable = realloc(fileTable, toSize * sizeof(FileEntry *));
     }
-    if (fileTable == NULL) {
-        fprintf(stderr, "Error: Couldn't allocate/reallocate the FileTable!\n");
-        exit(EXIT_FAILURE);
-    }
+    assert(fileTable != NULL);
+    *size_p = toSize;
 }
 
 /* Free's the file table */
@@ -160,13 +141,16 @@ void freeFileTable (void) {
 
 /* Returns a pointer to a file if a duplicate exists in the file table */
 FileEntry *duplicate (const char *fileName, long fileSize) {
-    int fd1, fd2;
+    int fd1 = -1, fd2 = -1;
+    assert(fileName != NULL);
+
     for (int i = 0; i < tp; i++) {
         if (fileTable[i]->size != fileSize) {
             continue;
         }
         fd1 = openFile(fileName);
         fd2 = openFile(fileTable[i]->fileName);
+        
         if (diff(fd1, fd2)) {
             close(fd1); close(fd2);
             continue;
@@ -182,8 +166,7 @@ void tabulate (const char *fileName, long fileSize) {
 
     // Reallocate the table if necessary.
     if (tp >= tableSize) {
-        tableSize = MAX(DEFAULT_TBL_SIZE, tableSize * 2);
-        resizeFileTable(tableSize);
+        resizeFileTable(&tableSize, MAX(DEFAULT_TBL_SIZE, tableSize * 2));
     }
     
     fileTable[tp++] = newFileEntry(fileName, fileSize);
@@ -195,10 +178,10 @@ void tabulate (const char *fileName, long fileSize) {
  ******************************************************************************
 */
 
-/* Returns consecutive directory entires from a directory stream */
-DirEntry *nextDirectoryEntry (DIR *directory) {
+/* Returns pointers to consecutive files in a directory stream */
+const char *nextDirectoryFile (DIR *directory) {
     struct dirent *entryBuffer;
-    static DirEntry entry = (DirEntry){.fileName = NULL};
+    static const char *fileName;
 
     // Write entries to buffer as long as more exist.
     while ((entryBuffer = readdir(directory)) != NULL) {
@@ -207,19 +190,18 @@ DirEntry *nextDirectoryEntry (DIR *directory) {
         if (entryBuffer->d_ino == 0) {
             continue;
         }
-
-        entry = setDirEntry(entry, entryBuffer->d_name);
-        return &entry;
+        fileName = entryBuffer->d_name;
+        return fileName;
     }
 
-    free(entry.fileName);
     return NULL;
 }
 
 /* Applies function 'f' to all valid files within given directory */
 void scanDirectory (const char *directoryName, void (*f)(const char *)) {
     char *pathName = NULL;
-    DirEntry *entry;
+    const char *fileName = NULL;
+    int pathSize = 0;
     DIR *directory;
 
     // Open the directory.
@@ -229,8 +211,7 @@ void scanDirectory (const char *directoryName, void (*f)(const char *)) {
     }
 
     // Scan directory contents.
-    while ((entry = nextDirectoryEntry(directory)) != NULL) {
-        char *fileName = entry->fileName;
+    while ((fileName = nextDirectoryFile(directory)) != NULL) {
 
         // Ignore self, parent.
         if (strcmp(fileName, ".") == 0 || strcmp(fileName, "..") == 0) {
@@ -238,7 +219,7 @@ void scanDirectory (const char *directoryName, void (*f)(const char *)) {
         }
 
         // Compute new length, resize buffer if required.
-        resizeString(&pathName, strlen(directoryName) + strlen(fileName) + 2);
+        resizeBuffer((void **)&pathName, &pathSize, strlen(directoryName) + strlen(fileName) + 2);
 
         // Write new path to buffer. Then scan the file.
         sprintf(pathName, "%s/%s", directoryName, fileName);
