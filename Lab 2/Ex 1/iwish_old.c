@@ -52,7 +52,7 @@ void restoreOut () {
 */
 int execProgram (int fd_in, int fd_out, char *p, char **pargs) {
     int pid;
-    if ((pid = fork()) == 0) {
+    if ((pid = fork()) == 0) { // Todo: If child has indirection, replace that here.
         replaceIn(fd_in);
         replaceOut(fd_out);
         execve(p, pargs, NULL);
@@ -91,6 +91,20 @@ int setPipeSequence (void) {
     }
 
     return execProgram(fd_in, alias_stdout, p->name, p->args);
+}
+
+int runCommandSequence (void) {
+    while ((ps = nextPipeSequence()) != NULL) {
+        if (accept(AMP)) {
+            if (fork() == 0) {
+                waitpid(setPipeSequence(ps));
+            }
+            continue;
+        }
+        
+        // Wait if semicolon or not.
+        waitpid(setPipeSequence(ps));
+    }
 }
 
 

@@ -2,66 +2,65 @@ Grammar
 
     0 $accept: program $end
 
-    1 program: linebreak complete_commands linebreak I_EOF
-    2        | linebreak I_EOF
+    1 program: break commandSequence break END
+    2        | break END
 
-    3 complete_commands: complete_commands newline_list complete_command
-    4                  | complete_command
+    3 commandSequence: commandSequence newlines compoundCommand
+    4                | compoundCommand
 
-    5 complete_command: list separator_op
-    6                 | list
+    5 compoundCommand: sequence delim_op
+    6                | sequence
 
-    7 list: list separator_op pipe_sequence
-    8     | pipe_sequence
+    7 $@1: %empty
 
-    9 pipe_sequence: simple_command
+    8 sequence: sequence delim_op $@1 pipeSequence
+    9         | pipeSequence
 
-   10 $@1: %empty
+   10 $@2: %empty
 
-   11 pipe_sequence: pipe_sequence PIPE $@1 linebreak simple_command
+   11 pipeSequence: pipeSequence PIPE $@2 break command
+   12             | command
 
-   12 simple_command: cmd_name cmd_suffix
-   13               | cmd_name
+   13 command: word args
+   14        | word
 
-   14 cmd_name: WORD
+   15 args: args word
+   16     | args redirection
+   17     | word
+   18     | redirection
 
-   15 cmd_suffix: io_file
-   16           | cmd_suffix io_file
-   17           | WORD
-   18           | cmd_suffix WORD
+   19 $@3: %empty
 
-   19 $@2: %empty
+   20 redirection: IN $@3 word
 
-   20 io_file: REDIR_IN $@2 filename
+   21 $@4: %empty
 
-   21 $@3: %empty
+   22 redirection: OUT $@4 word
 
-   22 io_file: REDIR_OUT $@3 filename
+   23 break: newlines
+   24      | %empty
 
-   23 filename: WORD
+   25 newlines: newlines NEWLINE
+   26         | NEWLINE
 
-   24 newline_list: NEWLINE
-   25             | newline_list NEWLINE
+   27 delim_op: AMPERSAND
+   28         | SEMICOLON
 
-   26 linebreak: newline_list
-   27          | %empty
-
-   28 separator_op: AMPERSAND
-   29             | SEMICOLON
+   29 word: WORD
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-WORD (258) 14 17 18 23
-NEWLINE (259) 24 25
-AMPERSAND (260) 28
-SEMICOLON (261) 29
-REDIR_IN (262) 20
-REDIR_OUT (263) 22
-PIPE (264) 11
-I_EOF (265) 1 2
+AMPERSAND (258) 27
+END (259) 1 2
+IN (260) 20
+NEWLINE (261) 25 26
+PIPE (262) 11
+OUT (263) 22
+SEMICOLON (264) 28
+WORD (265) 29
 
 
 Nonterminals, with rules where they appear
@@ -70,36 +69,36 @@ $accept (11)
     on left: 0
 program (12)
     on left: 1 2, on right: 0
-complete_commands (13)
+commandSequence (13)
     on left: 3 4, on right: 1 3
-complete_command (14)
+compoundCommand (14)
     on left: 5 6, on right: 3 4
-list (15)
-    on left: 7 8, on right: 5 6 7
-pipe_sequence (16)
-    on left: 9 11, on right: 7 8 11
-$@1 (17)
+sequence (15)
+    on left: 8 9, on right: 5 6 8
+$@1 (16)
+    on left: 7, on right: 8
+pipeSequence (17)
+    on left: 11 12, on right: 8 9 11
+$@2 (18)
     on left: 10, on right: 11
-simple_command (18)
-    on left: 12 13, on right: 9 11
-cmd_name (19)
-    on left: 14, on right: 12 13
-cmd_suffix (20)
-    on left: 15 16 17 18, on right: 12 16 18
-io_file (21)
-    on left: 20 22, on right: 15 16
-$@2 (22)
+command (19)
+    on left: 13 14, on right: 11 12
+args (20)
+    on left: 15 16 17 18, on right: 13 15 16
+redirection (21)
+    on left: 20 22, on right: 16 18
+$@3 (22)
     on left: 19, on right: 20
-$@3 (23)
+$@4 (23)
     on left: 21, on right: 22
-filename (24)
-    on left: 23, on right: 20 22
-newline_list (25)
-    on left: 24 25, on right: 3 25 26
-linebreak (26)
-    on left: 26 27, on right: 1 2 11
-separator_op (27)
-    on left: 28 29, on right: 5 7
+break (24)
+    on left: 23 24, on right: 1 2 11
+newlines (25)
+    on left: 25 26, on right: 3 23 25
+delim_op (26)
+    on left: 27 28, on right: 5 8
+word (27)
+    on left: 29, on right: 13 14 15 17 20 22
 
 
 State 0
@@ -108,18 +107,18 @@ State 0
 
     NEWLINE  shift, and go to state 1
 
-    $default  reduce using rule 27 (linebreak)
+    $default  reduce using rule 24 (break)
 
-    program       go to state 2
-    newline_list  go to state 3
-    linebreak     go to state 4
+    program   go to state 2
+    break     go to state 3
+    newlines  go to state 4
 
 
 State 1
 
-   24 newline_list: NEWLINE .
+   26 newlines: NEWLINE .
 
-    $default  reduce using rule 24 (newline_list)
+    $default  reduce using rule 26 (newlines)
 
 
 State 2
@@ -131,28 +130,28 @@ State 2
 
 State 3
 
-   25 newline_list: newline_list . NEWLINE
-   26 linebreak: newline_list .
+    1 program: break . commandSequence break END
+    2        | break . END
 
-    NEWLINE  shift, and go to state 6
+    END   shift, and go to state 6
+    WORD  shift, and go to state 7
 
-    $default  reduce using rule 26 (linebreak)
+    commandSequence  go to state 8
+    compoundCommand  go to state 9
+    sequence         go to state 10
+    pipeSequence     go to state 11
+    command          go to state 12
+    word             go to state 13
 
 
 State 4
 
-    1 program: linebreak . complete_commands linebreak I_EOF
-    2        | linebreak . I_EOF
+   23 break: newlines .
+   25 newlines: newlines . NEWLINE
 
-    WORD   shift, and go to state 7
-    I_EOF  shift, and go to state 8
+    NEWLINE  shift, and go to state 14
 
-    complete_commands  go to state 9
-    complete_command   go to state 10
-    list               go to state 11
-    pipe_sequence      go to state 12
-    simple_command     go to state 13
-    cmd_name           go to state 14
+    $default  reduce using rule 23 (break)
 
 
 State 5
@@ -164,301 +163,304 @@ State 5
 
 State 6
 
-   25 newline_list: newline_list NEWLINE .
-
-    $default  reduce using rule 25 (newline_list)
-
-
-State 7
-
-   14 cmd_name: WORD .
-
-    $default  reduce using rule 14 (cmd_name)
-
-
-State 8
-
-    2 program: linebreak I_EOF .
+    2 program: break END .
 
     $default  reduce using rule 2 (program)
 
 
-State 9
+State 7
 
-    1 program: linebreak complete_commands . linebreak I_EOF
-    3 complete_commands: complete_commands . newline_list complete_command
+   29 word: WORD .
+
+    $default  reduce using rule 29 (word)
+
+
+State 8
+
+    1 program: break commandSequence . break END
+    3 commandSequence: commandSequence . newlines compoundCommand
 
     NEWLINE  shift, and go to state 1
 
-    $default  reduce using rule 27 (linebreak)
+    $default  reduce using rule 24 (break)
 
-    newline_list  go to state 15
-    linebreak     go to state 16
+    break     go to state 15
+    newlines  go to state 16
+
+
+State 9
+
+    4 commandSequence: compoundCommand .
+
+    $default  reduce using rule 4 (commandSequence)
 
 
 State 10
 
-    4 complete_commands: complete_command .
-
-    $default  reduce using rule 4 (complete_commands)
-
-
-State 11
-
-    5 complete_command: list . separator_op
-    6                 | list .
-    7 list: list . separator_op pipe_sequence
+    5 compoundCommand: sequence . delim_op
+    6                | sequence .
+    8 sequence: sequence . delim_op $@1 pipeSequence
 
     AMPERSAND  shift, and go to state 17
     SEMICOLON  shift, and go to state 18
 
-    $default  reduce using rule 6 (complete_command)
+    $default  reduce using rule 6 (compoundCommand)
 
-    separator_op  go to state 19
+    delim_op  go to state 19
+
+
+State 11
+
+    9 sequence: pipeSequence .
+   11 pipeSequence: pipeSequence . PIPE $@2 break command
+
+    PIPE  shift, and go to state 20
+
+    $default  reduce using rule 9 (sequence)
 
 
 State 12
 
-    8 list: pipe_sequence .
-   11 pipe_sequence: pipe_sequence . PIPE $@1 linebreak simple_command
+   12 pipeSequence: command .
 
-    PIPE  shift, and go to state 20
-
-    $default  reduce using rule 8 (list)
+    $default  reduce using rule 12 (pipeSequence)
 
 
 State 13
 
-    9 pipe_sequence: simple_command .
+   13 command: word . args
+   14        | word .
 
-    $default  reduce using rule 9 (pipe_sequence)
+    IN    shift, and go to state 21
+    OUT   shift, and go to state 22
+    WORD  shift, and go to state 7
+
+    $default  reduce using rule 14 (command)
+
+    args         go to state 23
+    redirection  go to state 24
+    word         go to state 25
 
 
 State 14
 
-   12 simple_command: cmd_name . cmd_suffix
-   13               | cmd_name .
+   25 newlines: newlines NEWLINE .
 
-    WORD       shift, and go to state 21
-    REDIR_IN   shift, and go to state 22
-    REDIR_OUT  shift, and go to state 23
-
-    $default  reduce using rule 13 (simple_command)
-
-    cmd_suffix  go to state 24
-    io_file     go to state 25
+    $default  reduce using rule 25 (newlines)
 
 
 State 15
 
-    3 complete_commands: complete_commands newline_list . complete_command
-   25 newline_list: newline_list . NEWLINE
-   26 linebreak: newline_list .
+    1 program: break commandSequence break . END
 
-    WORD     shift, and go to state 7
-    NEWLINE  shift, and go to state 6
-
-    $default  reduce using rule 26 (linebreak)
-
-    complete_command  go to state 26
-    list              go to state 11
-    pipe_sequence     go to state 12
-    simple_command    go to state 13
-    cmd_name          go to state 14
+    END  shift, and go to state 26
 
 
 State 16
 
-    1 program: linebreak complete_commands linebreak . I_EOF
+    3 commandSequence: commandSequence newlines . compoundCommand
+   23 break: newlines .
+   25 newlines: newlines . NEWLINE
 
-    I_EOF  shift, and go to state 27
+    NEWLINE  shift, and go to state 14
+    WORD     shift, and go to state 7
+
+    $default  reduce using rule 23 (break)
+
+    compoundCommand  go to state 27
+    sequence         go to state 10
+    pipeSequence     go to state 11
+    command          go to state 12
+    word             go to state 13
 
 
 State 17
 
-   28 separator_op: AMPERSAND .
+   27 delim_op: AMPERSAND .
 
-    $default  reduce using rule 28 (separator_op)
+    $default  reduce using rule 27 (delim_op)
 
 
 State 18
 
-   29 separator_op: SEMICOLON .
+   28 delim_op: SEMICOLON .
 
-    $default  reduce using rule 29 (separator_op)
+    $default  reduce using rule 28 (delim_op)
 
 
 State 19
 
-    5 complete_command: list separator_op .
-    7 list: list separator_op . pipe_sequence
+    5 compoundCommand: sequence delim_op .
+    8 sequence: sequence delim_op . $@1 pipeSequence
 
-    WORD  shift, and go to state 7
+    WORD      reduce using rule 7 ($@1)
+    $default  reduce using rule 5 (compoundCommand)
 
-    $default  reduce using rule 5 (complete_command)
-
-    pipe_sequence   go to state 28
-    simple_command  go to state 13
-    cmd_name        go to state 14
+    $@1  go to state 28
 
 
 State 20
 
-   11 pipe_sequence: pipe_sequence PIPE . $@1 linebreak simple_command
+   11 pipeSequence: pipeSequence PIPE . $@2 break command
 
-    $default  reduce using rule 10 ($@1)
+    $default  reduce using rule 10 ($@2)
 
-    $@1  go to state 29
+    $@2  go to state 29
 
 
 State 21
 
-   17 cmd_suffix: WORD .
+   20 redirection: IN . $@3 word
 
-    $default  reduce using rule 17 (cmd_suffix)
+    $default  reduce using rule 19 ($@3)
+
+    $@3  go to state 30
 
 
 State 22
 
-   20 io_file: REDIR_IN . $@2 filename
+   22 redirection: OUT . $@4 word
 
-    $default  reduce using rule 19 ($@2)
+    $default  reduce using rule 21 ($@4)
 
-    $@2  go to state 30
+    $@4  go to state 31
 
 
 State 23
 
-   22 io_file: REDIR_OUT . $@3 filename
+   13 command: word args .
+   15 args: args . word
+   16     | args . redirection
 
-    $default  reduce using rule 21 ($@3)
+    IN    shift, and go to state 21
+    OUT   shift, and go to state 22
+    WORD  shift, and go to state 7
 
-    $@3  go to state 31
+    $default  reduce using rule 13 (command)
+
+    redirection  go to state 32
+    word         go to state 33
 
 
 State 24
 
-   12 simple_command: cmd_name cmd_suffix .
-   16 cmd_suffix: cmd_suffix . io_file
-   18           | cmd_suffix . WORD
+   18 args: redirection .
 
-    WORD       shift, and go to state 32
-    REDIR_IN   shift, and go to state 22
-    REDIR_OUT  shift, and go to state 23
-
-    $default  reduce using rule 12 (simple_command)
-
-    io_file  go to state 33
+    $default  reduce using rule 18 (args)
 
 
 State 25
 
-   15 cmd_suffix: io_file .
+   17 args: word .
 
-    $default  reduce using rule 15 (cmd_suffix)
+    $default  reduce using rule 17 (args)
 
 
 State 26
 
-    3 complete_commands: complete_commands newline_list complete_command .
-
-    $default  reduce using rule 3 (complete_commands)
-
-
-State 27
-
-    1 program: linebreak complete_commands linebreak I_EOF .
+    1 program: break commandSequence break END .
 
     $default  reduce using rule 1 (program)
 
 
+State 27
+
+    3 commandSequence: commandSequence newlines compoundCommand .
+
+    $default  reduce using rule 3 (commandSequence)
+
+
 State 28
 
-    7 list: list separator_op pipe_sequence .
-   11 pipe_sequence: pipe_sequence . PIPE $@1 linebreak simple_command
+    8 sequence: sequence delim_op $@1 . pipeSequence
 
-    PIPE  shift, and go to state 20
+    WORD  shift, and go to state 7
 
-    $default  reduce using rule 7 (list)
+    pipeSequence  go to state 34
+    command       go to state 12
+    word          go to state 13
 
 
 State 29
 
-   11 pipe_sequence: pipe_sequence PIPE $@1 . linebreak simple_command
+   11 pipeSequence: pipeSequence PIPE $@2 . break command
 
     NEWLINE  shift, and go to state 1
 
-    $default  reduce using rule 27 (linebreak)
+    $default  reduce using rule 24 (break)
 
-    newline_list  go to state 3
-    linebreak     go to state 34
+    break     go to state 35
+    newlines  go to state 4
 
 
 State 30
 
-   20 io_file: REDIR_IN $@2 . filename
+   20 redirection: IN $@3 . word
 
-    WORD  shift, and go to state 35
+    WORD  shift, and go to state 7
 
-    filename  go to state 36
+    word  go to state 36
 
 
 State 31
 
-   22 io_file: REDIR_OUT $@3 . filename
+   22 redirection: OUT $@4 . word
 
-    WORD  shift, and go to state 35
+    WORD  shift, and go to state 7
 
-    filename  go to state 37
+    word  go to state 37
 
 
 State 32
 
-   18 cmd_suffix: cmd_suffix WORD .
+   16 args: args redirection .
 
-    $default  reduce using rule 18 (cmd_suffix)
+    $default  reduce using rule 16 (args)
 
 
 State 33
 
-   16 cmd_suffix: cmd_suffix io_file .
+   15 args: args word .
 
-    $default  reduce using rule 16 (cmd_suffix)
+    $default  reduce using rule 15 (args)
 
 
 State 34
 
-   11 pipe_sequence: pipe_sequence PIPE $@1 linebreak . simple_command
+    8 sequence: sequence delim_op $@1 pipeSequence .
+   11 pipeSequence: pipeSequence . PIPE $@2 break command
 
-    WORD  shift, and go to state 7
+    PIPE  shift, and go to state 20
 
-    simple_command  go to state 38
-    cmd_name        go to state 14
+    $default  reduce using rule 8 (sequence)
 
 
 State 35
 
-   23 filename: WORD .
+   11 pipeSequence: pipeSequence PIPE $@2 break . command
 
-    $default  reduce using rule 23 (filename)
+    WORD  shift, and go to state 7
+
+    command  go to state 38
+    word     go to state 13
 
 
 State 36
 
-   20 io_file: REDIR_IN $@2 filename .
+   20 redirection: IN $@3 word .
 
-    $default  reduce using rule 20 (io_file)
+    $default  reduce using rule 20 (redirection)
 
 
 State 37
 
-   22 io_file: REDIR_OUT $@3 filename .
+   22 redirection: OUT $@4 word .
 
-    $default  reduce using rule 22 (io_file)
+    $default  reduce using rule 22 (redirection)
 
 
 State 38
 
-   11 pipe_sequence: pipe_sequence PIPE $@1 linebreak simple_command .
+   11 pipeSequence: pipeSequence PIPE $@2 break command .
 
-    $default  reduce using rule 11 (pipe_sequence)
+    $default  reduce using rule 11 (pipeSequence)

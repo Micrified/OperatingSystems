@@ -45,14 +45,14 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    WORD = 258,
-    NEWLINE = 259,
-    AMPERSAND = 260,
-    SEMICOLON = 261,
-    REDIR_IN = 262,
-    REDIR_OUT = 263,
-    PIPE = 264,
-    I_EOF = 265
+    AMPERSAND = 258,
+    END = 259,
+    IN = 260,
+    NEWLINE = 261,
+    PIPE = 262,
+    OUT = 263,
+    SEMICOLON = 264,
+    WORD = 265
   };
 #endif
 

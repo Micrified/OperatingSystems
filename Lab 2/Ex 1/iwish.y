@@ -1,104 +1,103 @@
 
-
 %{
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-    #include "list.h"
-    
-    /* External Flex Variables */
-    extern int yylex();
+    #include <assert.h>
+    #include "strtab.h"
+    #include "queue.h"
+    #include "eval.h"
+
+    // [Flex] External variables.
+    extern int  yylex();
     extern void yylex_destroy();
     extern char *yytext;
-
-    /* Handler for Bison parse errors */
-    int yyerror(char *s) {
-        printf("PARSE ERROR!\n");
-        exit(EXIT_SUCCESS);
+    
+    // [Bison] Parse error routine.
+    int yyerror (char *s) {
+        fprintf(stderr, "Error: Bad Parse!\n");
+        exit(EXIT_FAILURE);
     }
 %}
 
-/*
-********************************************************************************
-*                               Token Declarations
-********************************************************************************
-*/
-
-// Complex Tokens.
-%token  WORD
-
-// Simple Tokens.
-%token  NEWLINE
-%token  AMPERSAND
-%token  SEMICOLON
-%token  REDIR_IN
-%token  REDIR_OUT
-%token  PIPE
-%token  I_EOF
-
-// The starting rule.
-%start program
+%token AMPERSAND
+%token END
+%token IN
+%token NEWLINE
+%token PIPE
+%token OUT
+%token SEMICOLON
+%token WORD
 
 %%
 
-program          : linebreak complete_commands linebreak I_EOF    { printf("ACCEPTED!\n"); printTokenList(); YYACCEPT; }
-                 | linebreak I_EOF                                { printf("ACCEPTED!\n"); printTokenList(); YYACCEPT; } 
-                 ;
+program             : break commandSequence break END   { evalQueue(); YYACCEPT; }
+                    | break END                         { YYACCEPT; }
+                    ;
 
-complete_commands: complete_commands newline_list complete_command
-                 |                                complete_command
-                 ;
+commandSequence     : commandSequence newlines compoundCommand
+                    | compoundCommand
+                    ;
 
-complete_command : list separator_op
-                 | list
-                 ;
+compoundCommand     : sequence delim_op             
+                    | sequence
+                    ;
 
-list             : list separator_op pipe_sequence { printf("COMMAND = "); printTokenList(); printf("\n"); }
-                 |                   pipe_sequence { printf("COMMAND = "); printTokenList(); printf("\n"); }
-                 ;
+sequence            : sequence delim_op             { evalQueue();  } 
+                    pipeSequence
+                    | pipeSequence
+                    ;
 
-pipe_sequence    :                             simple_command
-                 | pipe_sequence PIPE { appendOperator(TYPE_PIPE); } linebreak simple_command
-                 ;
+pipeSequence        : pipeSequence PIPE             { enqueue((Item){PIPE, NIL}); } 
+                    break command
+                    | command
+                    ;
 
-simple_command   : cmd_name cmd_suffix
-                 | cmd_name
-                 ;
+command             : word args
+                    | word                          
+                    ;
 
-cmd_name         : WORD { appendWord(yytext); }
-                 ;
+args                : args word                     
+                    | args redirection
+                    | word                                        
+                    | redirection
+                    ;
 
-cmd_suffix       :            io_file
-                 | cmd_suffix io_file
-                 |            WORD { appendWord(yytext); }
-                 | cmd_suffix WORD { appendWord(yytext); }
-                 ;
+redirection         : IN                            { enqueue((Item){IN, NIL});  }
+                    word                                           
+                    | OUT                           { enqueue((Item){OUT, NIL}); }
+                    word                         
+                    ;
 
-io_file          : REDIR_IN     { appendOperator(TYPE_REDIR_IN);  }    filename 
-                 | REDIR_OUT    { appendOperator(TYPE_REDIR_OUT); }    filename 
-                 ;
+break               : newlines
+                    | /* Epsilon */
+                    ;
 
-filename         : WORD { appendWord(yytext); }                
-                 ;
+newlines            : newlines NEWLINE
+                    | NEWLINE
+                    ;
 
-newline_list     :              NEWLINE
-                 | newline_list NEWLINE
-                 ;
+delim_op            : AMPERSAND                     { enqueue((Item){AMPERSAND, NIL}); }
+                    | SEMICOLON                     { enqueue((Item){SEMICOLON, NIL}); }
+                    ;
 
-linebreak        : newline_list
-                 | /* empty */
-                 ;
+word                : WORD                          { enqueue((Item){WORD, putString(yytext)}); }
+                    ;
 
-separator_op     : AMPERSAND    { appendOperator(TYPE_AMP); }    
-                 | SEMICOLON    { appendOperator(TYPE_SCOLON); } 
-                 ;
-
-%% 
+%%
 
 int main (void) {
+
+    // Run the input.
     yyparse();
 
-    freeTokenList();
+    // Free lexeme buffer.
+    freeStringTable();
+
+    // Free flex memory.
     yylex_destroy();
+
     return EXIT_SUCCESS;
 }
+
+

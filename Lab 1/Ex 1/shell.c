@@ -77,7 +77,7 @@ int main (int argc, char *argv[]) {
     // Fork: If child, transform process. Otherwise wait.
     if ((pid = fork()) != 0) {
         waitpid(pid, &status, 0);
-
+    } else {
         // Get environment path. Save to buffer.
         char *envp = getenv("PATH");
         resizeBuffer((void **)&paths, &pathsSize, strlen(envp), sizeof(char));

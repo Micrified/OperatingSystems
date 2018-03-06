@@ -371,8 +371,8 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[14] =
     {   0,
-        0,    0,    9,    7,    8,    6,    4,    5,    1,    2,
-        3,    7,    0
+        0,    0,    9,    7,    8,    6,    1,    5,    2,    3,
+        4,    7,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -451,16 +451,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "iwish.lex"
-#line 4 "iwish.lex"
-    /*
-    *************************************************************************
-    *                                Ex.1                                   *
-    * Author(s):   Barnabas Busa, Joe Jones, Charles Randolph.              *
-    *************************************************************************
-    */ 
+#line 3 "iwish.lex"
     #include <stdlib.h>
     #include "iwish.tab.h"
-#line 464 "lex.yy.c"
+#line 458 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -642,10 +636,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 16 "iwish.lex"
+#line 9 "iwish.lex"
 
 
-#line 649 "lex.yy.c"
+#line 643 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -730,50 +724,50 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 18 "iwish.lex"
-{ printf("IN-DIR \"%s\"\n", yytext); return REDIR_IN;  }
+#line 11 "iwish.lex"
+{ return AMPERSAND; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 19 "iwish.lex"
-{ printf("OUT-DIR \"%s\"\n", yytext); return REDIR_OUT; }
+#line 12 "iwish.lex"
+{ return IN;  }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "iwish.lex"
-{ printf("PIPE \"%s\"\n", yytext); return PIPE;      }
+#line 13 "iwish.lex"
+{ return OUT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 21 "iwish.lex"
-{ printf("AMP \"%s\"\n", yytext); return AMPERSAND; }
+#line 14 "iwish.lex"
+{ return PIPE;      }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 22 "iwish.lex"
-{ printf("S-COLON \"%s\"\n", yytext); return SEMICOLON; }
+#line 15 "iwish.lex"
+{ return SEMICOLON; }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 23 "iwish.lex"
-{ printf("NEWLINE \"%s\"\n", yytext); return NEWLINE;   }
+#line 16 "iwish.lex"
+{ return NEWLINE;   }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 25 "iwish.lex"
-{ printf("Word \"%s\"\n", yytext); return WORD;      }
+#line 18 "iwish.lex"
+{ return WORD;      }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 27 "iwish.lex"
-{ printf("Accepted EOF!\n"); return I_EOF;       }
+#line 20 "iwish.lex"
+{ return END; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 29 "iwish.lex"
+#line 22 "iwish.lex"
 ECHO;
 	YY_BREAK
-#line 777 "lex.yy.c"
+#line 771 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1768,6 +1762,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 29 "iwish.lex"
+#line 22 "iwish.lex"
 
 
