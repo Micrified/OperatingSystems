@@ -6,6 +6,7 @@
     #include <assert.h>
     #include "strtab.h"
     #include "queue.h"
+    #include "util.h"
     #include "eval.h"
 
     // [Flex] External variables.
@@ -93,6 +94,9 @@ int main (void) {
 
     // Free lexeme buffer.
     freeStringTable();
+
+    // Free path buffer.
+    freePaths();
 
     // Free flex memory.
     yylex_destroy();

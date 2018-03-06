@@ -1,16 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include "queue.h"
-#include "iwish.tab.h"
-#include "strtab.h"
+#include "eval.h"
 
 #define PROGRAM_MIN_ARGC    1
+
+#define FD_NONE             -1
+
+#define MAX(a,b)            ((a) > (b) ? (a) : (b))
 
 /*
 *******************************************************************************
@@ -94,6 +88,12 @@ Program *newProgram (char *name, char **args, char *in, char *out) {
     return p;
 }
 
+/* Frees a Program instance */
+void freeProgram (Program *p) {
+    free(p->args);
+    free(p);
+}
+
 /* [DEBUG] Prints a Program instance */
 void printProgram (Program *p) {
     if (p == NULL) {
@@ -169,39 +169,60 @@ Program *parseProgram () {
 *******************************************************************************
 */
 
-int evalProgram (int fd_in, int fd_out, Program *p) {
-    int pid;
-    printf("Launching -> "); printProgram(p);
-    if ((pid = fork()) == 0) {
-        
-        // Link standard I/O.
+int execProgram (int fd_in, int fd_out, Program *p) {
+        char *path, *buffer = NULL;
+        int bufferSize = 0;
+        printf("[PROGRAM %s, PID = %d]\n", p->name, getpid());
+        // Apply implicit redirection.
         replaceIn(fd_in);
         replaceOut(fd_out);
 
-        // Link explicit I/O.
-        if (p->in != NULL ) {
+        // Apply explicit redirection.
+        if (p->in != NULL) {
             replaceIn(openInFile(p->in));
         }
         if (p->out != NULL) {
             replaceOut(openOutFile(p->out));
         }
 
-        // Display Error if bad program.
-        if (execve(p->name, p->args, NULL) == -1) {
-            fprintf(stderr, "Error: Couldn't run \"%s\"!\n", p->name);
-            fprintf(stderr, "More: %s\n", strerror(errno));
-            exit(-1);
+        // Attempt to execute local program.
+        execv(p->name, p->args);
+
+        // Attempt to execute on all paths.
+        while ((path = nextPath()) != NULL) {
+            bufferSize = MAX(bufferSize, strlen(path) + strlen(p->name) + 2);
+            buffer = resizeBuffer(buffer, bufferSize, sizeof(char));
+            sprintf(buffer, "%s/%s", path, p->name);
+            execv(buffer, p->args);
         }
-        exit(0);
+        free(buffer);
+        return -1;
+}
+
+int evalProgram (int fd_in, int fd_out, int fd_close, Program *p) {
+    int pid;
+    printf("Launching -> "); printProgram(p);
+
+    // Return child PID if parent.
+    if ((pid = fork()) != 0) {
+        freeProgram(p);
+        return pid;
     }
-    return pid;
+
+    // Search for program on all paths. Print error if failure.
+    if (fd_close != FD_NONE) close(fd_close);
+    execProgram(fd_in, fd_out, p);
+    fprintf(stderr, "Error: Couldn't execute \"%s\"!\n", p->name);    
+    freeProgram(p);
+    exit(-1);
 }
 
 
 int setPipe (int fd_in, Program *p) {
     int fds[2];
     assert((pipe(fds) != -1) && "Error: Pipe creation failed!\n");
-    evalProgram(fd_in, fds[1], p);
+    evalProgram(fd_in, fds[1], fds[0], p); // Pass read port so fork can close it for us.
+    close(fds[1]); // Close Writing descriptor to hand control to fork.
     return fds[0];
 }
 
@@ -213,10 +234,10 @@ static int evalPipeSequence() {
         dequeue();
         next = parseProgram();
         fd_in = setPipe(fd_in, p);
-        free(p); p = next;
+        p = next;
     }
 
-    return evalProgram (fd_in, STDOUT_FILENO, p);
+    return evalProgram (fd_in, STDOUT_FILENO, FD_NONE, p);
 }
 
 /*
@@ -242,6 +263,7 @@ void evalQueue () {
         printf("Done: PID = %d, MODE = ASYNC\n", pid);
         if (fork() == 0) {
             waitpid(pid, &status, 0);
+            exit(0);
         }
     } else {
         printf("Done: PID = %d, MODE = SERIAL\n", pid);

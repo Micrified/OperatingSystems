@@ -66,7 +66,7 @@ void freeNode (Node *node) {
 
 /* Enqueues item. Resizes queue if necessary */
 void enqueue (Item item) {
-    assert(!(tail == NULL ^ head == NULL) && "Error: Queue corruption!");
+    assert(!((tail == NULL) ^ (head == NULL)) && "Error: Queue corruption!");
     if (tail == NULL) {
         head = tail = newNode(item, NULL);
     } else {
@@ -80,8 +80,9 @@ Item dequeue () {
     Item item = NULL_ITEM;
     if (head != NULL) {
         item = head->item;
+        Node *newHead = head->next;
         freeNode(head);
-        head = (head->next);
+        head = newHead;
         size--;
     }
     // If queue emptied, reset the tail pointer.
