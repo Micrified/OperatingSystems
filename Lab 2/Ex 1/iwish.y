@@ -40,8 +40,8 @@ commandSequence     : commandSequence newlines compoundCommand
                     | compoundCommand
                     ;
 
-compoundCommand     : sequence delim_op             
-                    | sequence
+compoundCommand     : sequence delim_op             { evalQueue(); }            
+                    | sequence                      { evalQueue(); }  
                     ;
 
 sequence            : sequence delim_op             { evalQueue();  } 

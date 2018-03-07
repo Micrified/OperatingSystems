@@ -172,7 +172,7 @@ Program *parseProgram () {
 int execProgram (int fd_in, int fd_out, Program *p) {
         char *path, *buffer = NULL;
         int bufferSize = 0;
-        printf("[PROGRAM %s, PID = %d]\n", p->name, getpid());
+        //printf("[PROGRAM %s, PID = %d]\n", p->name, getpid());
         // Apply implicit redirection.
         replaceIn(fd_in);
         replaceOut(fd_out);
@@ -201,7 +201,7 @@ int execProgram (int fd_in, int fd_out, Program *p) {
 
 int evalProgram (int fd_in, int fd_out, int fd_close, Program *p) {
     int pid;
-    printf("Launching -> "); printProgram(p);
+    //printf("Launching -> "); printProgram(p);
 
     // Return child PID if parent.
     if ((pid = fork()) != 0) {
@@ -250,25 +250,31 @@ static int evalPipeSequence() {
 void evalQueue () {
     int pid, status;
     Item item;
-    printf("-------------------- Evaluating --------------------\n");
+    //printf("-------------------- Evaluating --------------------\n");
+
+    // If nothing is in the queue, don't process it.
+    if (queueSize() <= 0) {
+        return;
+    }
+
     // Process the pipe-sequence. Obtain PID of last program.
     pid = evalPipeSequence();
-    printf("\nLast PID = %d...\n\n", pid);
+    //printf("\nLast PID = %d...\n\n", pid);
     // Dequeue potential separator. 
     // If separator exists and is "&" -> fork the shell.
     //  - If child of fork -> wait on PID.
     //  - If parent -> return.
     // Else separator not exists or is ";" -> wait on PID.
     if (!IS_NULL((item = dequeue())) && item.type == AMPERSAND) {
-        printf("Done: PID = %d, MODE = ASYNC\n", pid);
+        //printf("Done: PID = %d, MODE = ASYNC\n", pid);
         if (fork() == 0) {
             waitpid(pid, &status, 0);
             exit(0);
         }
     } else {
-        printf("Done: PID = %d, MODE = SERIAL\n", pid);
+        //printf("Done: PID = %d, MODE = SERIAL\n", pid);
         waitpid(pid, &status, 0);
     }
-    printf("Check: Queue Empty ? %s\n", queueSize() == 0 ? "Yes" : "No");
-    printf("-------------------- ---------- --------------------\n");
+    //printf("Check: Queue Empty ? %s\n", queueSize() == 0 ? "Yes" : "No");
+    //printf("-------------------- ---------- --------------------\n");
 }

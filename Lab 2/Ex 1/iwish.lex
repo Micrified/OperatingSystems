@@ -16,6 +16,7 @@ word            [^ \t\n<>|&;]+
 "\n"            { return NEWLINE;   }
 
 {word}          { return WORD;      }
+" "             { }
 
 <<EOF>>         { return END; }
 
