@@ -21,7 +21,7 @@ int tp, tabSize;
 */
 
 /* Resizes the string table */
-void resizeTable (int toSize) {
+static void resizeTable (int toSize) {
     if (strtab == NULL) {
         strtab = calloc(toSize, sizeof(char)); // Allocate with zeroed bytes.
     } else {

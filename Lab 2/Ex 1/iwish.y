@@ -32,24 +32,24 @@
 
 %%
 
-program             : break commandSequence break END   { evalQueue(); YYACCEPT; }
-                    | break END                         { YYACCEPT; }
+program             : break commandSequence break END       { evalQueue(); YYACCEPT; }
+                    | break END                             { YYACCEPT; }
                     ;
 
 commandSequence     : commandSequence newlines compoundCommand
                     | compoundCommand
                     ;
 
-compoundCommand     : sequence delim_op             { evalQueue(); }            
-                    | sequence                      { evalQueue(); }  
+compoundCommand     : sequence delim_op                     { evalQueue(); }            
+                    | sequence                              { evalQueue(); }  
                     ;
 
-sequence            : sequence delim_op             { evalQueue();  } 
+sequence            : sequence delim_op                     { evalQueue();  } 
                     pipeSequence
                     | pipeSequence
                     ;
 
-pipeSequence        : pipeSequence PIPE             { enqueue((Item){PIPE, NIL}); } 
+pipeSequence        : pipeSequence PIPE                     { enqueue((Item){PIPE, NIL}); } 
                     break command
                     | command
                     ;
@@ -64,9 +64,9 @@ args                : args word
                     | redirection
                     ;
 
-redirection         : IN                            { enqueue((Item){IN, NIL});  }
+redirection         : IN                                    { enqueue((Item){IN, NIL});  }
                     word                                           
-                    | OUT                           { enqueue((Item){OUT, NIL}); }
+                    | OUT                                   { enqueue((Item){OUT, NIL}); }
                     word                         
                     ;
 
@@ -78,11 +78,11 @@ newlines            : newlines NEWLINE
                     | NEWLINE
                     ;
 
-delim_op            : AMPERSAND                     { enqueue((Item){AMPERSAND, NIL}); }
-                    | SEMICOLON                     { enqueue((Item){SEMICOLON, NIL}); }
+delim_op            : AMPERSAND                             { enqueue((Item){AMPERSAND, NIL}); }
+                    | SEMICOLON                             { enqueue((Item){SEMICOLON, NIL}); }
                     ;
 
-word                : WORD                          { enqueue((Item){WORD, putString(yytext)}); }
+word                : WORD                                  { enqueue((Item){WORD, putString(yytext)}); }
                     ;
 
 %%
@@ -92,7 +92,7 @@ int main (void) {
     // Print prompt token.
     printf("iwish$ ");
 
-    // Run the input.
+    // Run the shell.
     yyparse();
 
     // Free lexeme buffer.

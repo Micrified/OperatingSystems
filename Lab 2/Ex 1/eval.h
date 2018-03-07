@@ -6,9 +6,9 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include "queue.h"
 #include "iwish.tab.h"
 #include "strtab.h"

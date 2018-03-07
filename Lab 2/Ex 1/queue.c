@@ -26,27 +26,12 @@ unsigned size;
 
 /*
 *******************************************************************************
-*                              Item Routines                                  *
-*******************************************************************************
-*/
-
-/* [DEBUG] Prints an item */
-void printItem (Item item) {
-    if (IS_NULL(item)) {
-        fprintf(stdout, "[ NULL ]\n");
-        return;
-    }
-    fprintf(stdout, "[ TYPE: %u | WORD: \"%s\"]\n", item.type, getString(item.widx));
-}
-
-/*
-*******************************************************************************
 *                              Node Routines                                  *
 *******************************************************************************
 */
 
 /* Allocates and returns a new node configured with the given parameters */
-Node *newNode (Item item, Node *next) {
+static Node *newNode (Item item, Node *next) {
     Node *node = malloc(sizeof(Node));
     assert(node != NULL && "Error: Couldn't allocate node!\n");
     *node = (Node){.item = item, .next = next};
@@ -54,13 +39,13 @@ Node *newNode (Item item, Node *next) {
 }
 
 /* Free's the given node (and item) */
-void freeNode (Node *node) {
+static void freeNode (Node *node) {
     free(node);
 }
 
 /*
 *******************************************************************************
-*                              Stack Routines                                 *
+*                              Queue Routines                                 *
 *******************************************************************************
 */
 
@@ -113,15 +98,3 @@ unsigned queueSize() {
     return size;
 }
 
-/* [DEBUG] Prints the queue */
-void printQueue () {
-    int i = 0;
-    Node *n = head;
-    printf("QUEUE :: (%u elements)\n", size);
-    printf("HEAD = %p, TAIL = %p\n", head, tail);
-    while (n != NULL) {
-        printf("%d. ", i); printItem(n->item);
-        i++;
-        n = n->next;
-    }
-}

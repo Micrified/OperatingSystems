@@ -1,9 +1,12 @@
 #include "eval.h"
 
+// Minimum program argument count (1 for program name)
 #define PROGRAM_MIN_ARGC    1
 
+// An invalid file-descriptor constant.
 #define FD_NONE             -1
 
+// Max.
 #define MAX(a,b)            ((a) > (b) ? (a) : (b))
 
 /*
@@ -26,20 +29,20 @@ typedef struct {
 /* Replaces stdin with the given file-descriptor. Returns duplicate fd. */
 static int replaceIn (int fd) {
     if (fd == STDIN_FILENO) return fd;
-    close(STDIN_FILENO);
-    return dup2(fd, STDIN_FILENO); // Replace stdin, return new file-descriptor.
+    safeClose(STDIN_FILENO);
+    return safeDup2(fd, STDIN_FILENO); // Replace stdin, return new descriptor.
 }
 
 /* Replaces stdout with the given file-descriptor. Returns duplicate fd */
 static int replaceOut (int fd) {
     if (fd == STDOUT_FILENO) return fd;
-    close(STDOUT_FILENO);
-    return dup2(fd, STDOUT_FILENO); // Replace stdout, return new file-descriptor.
+    safeClose(STDOUT_FILENO);
+    return safeDup2(fd, STDOUT_FILENO); // Replace stdout, return new descriptor.
 }
 
 /*
 *******************************************************************************
-*                             Utility Routines                                *
+*                             Auxiliary Routines                              *
 *******************************************************************************
 */
 
@@ -54,26 +57,6 @@ static void *resizeBuffer (void *buffer, unsigned n, unsigned typeSize) {
     return buffer;
 }
 
-/* Attempts to open a file for reading. Aborts on failure */
-int openInFile (const char *fileName) {
-    int fd;
-    if ((fd = open(fileName, O_RDONLY)) == -1) {
-        fprintf(stderr, "Error: Can't open \"%s\" for reading!\n", fileName);
-        exit(-1);
-    }
-    return fd;
-}
-
-/* Attempts to open or create a file for writing. Aborts on failure */
-int openOutFile (const char *fileName) {
-    int fd;
-    if ((fd = open(fileName, O_CREAT | O_WRONLY | O_TRUNC, 0755)) == -1) {
-        fprintf(stderr, "Error: Can't create or write to \"%s\"!\n", fileName);
-        exit(-1);
-    }
-    return fd;
-}
-
 /*
 *******************************************************************************
 *                          Program Parsing Routines                           *
@@ -81,7 +64,7 @@ int openOutFile (const char *fileName) {
 */
 
 /* Allocates and initializes a Program instance with given attributes */
-Program *newProgram (char *name, char **args, char *in, char *out) {
+static Program *newProgram (char *name, char **args, char *in, char *out) {
     Program *p = malloc(sizeof(Program));
     assert(p != NULL);
     *p = (Program){.name = name, .args = args, .in = in, .out = out};
@@ -89,36 +72,14 @@ Program *newProgram (char *name, char **args, char *in, char *out) {
 }
 
 /* Frees a Program instance */
-void freeProgram (Program *p) {
+static void freeProgram (Program *p) {
     free(p->args);
     free(p);
 }
 
-/* [DEBUG] Prints a Program instance */
-void printProgram (Program *p) {
-    if (p == NULL) {
-        printf("{ NULL }\n");
-        return;
-    }
-
-    printf("{ Program: \"%s\", ", p->name);
-    printf("In = %s, ", (p->in == NULL ? "None" : p->in));
-    printf("Out = %s, ", (p->out == NULL ? "None" : p->out));
-    printf("Args = [");
-    char **args = p->args;
-    while (*args != NULL) {
-        printf("\"%s\"", *args);
-        if (*(args + 1) != NULL) {
-            printf(",");
-        }
-        args++;
-    }
-    printf("] }\n");
-}
-
 /* Parses a program from the queue and returns an initialized "Program" type.
  * If no program exists, NULL is returned. */
-Program *parseProgram () {
+static Program *parseProgram () {
     unsigned i = 0, argc = PROGRAM_MIN_ARGC;
     Item arg;
     char *name = NULL, **args = NULL, *in = NULL, *out = NULL;
@@ -169,20 +130,21 @@ Program *parseProgram () {
 *******************************************************************************
 */
 
-int execProgram (int fd_in, int fd_out, Program *p) {
+/* Applies piping and redirection to fork. Tries to exec on all paths */
+static int execProgram (int fd_in, int fd_out, Program *p) {
         char *path, *buffer = NULL;
         int bufferSize = 0;
-        //printf("[PROGRAM %s, PID = %d]\n", p->name, getpid());
+
         // Apply implicit redirection.
         replaceIn(fd_in);
         replaceOut(fd_out);
 
         // Apply explicit redirection.
         if (p->in != NULL) {
-            replaceIn(openInFile(p->in));
+            replaceIn(safeOpen(p->in, O_RDONLY));
         }
         if (p->out != NULL) {
-            replaceOut(openOutFile(p->out));
+            replaceOut(safeOpenMode(p->out, O_CREAT | O_WRONLY | O_TRUNC, 0755));
         }
 
         // Attempt to execute local program.
@@ -199,9 +161,9 @@ int execProgram (int fd_in, int fd_out, Program *p) {
         return -1;
 }
 
-int evalProgram (int fd_in, int fd_out, int fd_close, Program *p) {
+/* Forks shell. Free's program and returns if parent. Executes program if child */
+static int evalProgram (int fd_in, int fd_out, int fd_close, Program *p) {
     int pid;
-    //printf("Launching -> "); printProgram(p);
 
     // Return child PID if parent.
     if ((pid = fork()) != 0) {
@@ -210,22 +172,30 @@ int evalProgram (int fd_in, int fd_out, int fd_close, Program *p) {
     }
 
     // Search for program on all paths. Print error if failure.
-    if (fd_close != FD_NONE) close(fd_close);
+    if (fd_close != FD_NONE) safeClose(fd_close);
     execProgram(fd_in, fd_out, p);
     fprintf(stderr, "Error: Couldn't execute \"%s\"!\n", p->name);    
     freeProgram(p);
-    exit(-1);
+    exit(EXIT_FAILURE);
 }
 
-
-int setPipe (int fd_in, Program *p) {
+/* Initializes a pipe. Lauches program with given fd_in as stdin. Hooks stdout to pipe.
+ * Then returns other reading file-descriptor back so it can be hooked to next pipe 
+ * [Important]: Sends reading descriptor to be closed by fork. And closes writing
+ *  so that no two forks will have the same file-descriptors open. */
+static int setPipe (int fd_in, Program *p) {
     int fds[2];
-    assert((pipe(fds) != -1) && "Error: Pipe creation failed!\n");
+    safePipe(fds);
     evalProgram(fd_in, fds[1], fds[0], p); // Pass read port so fork can close it for us.
-    close(fds[1]); // Close Writing descriptor to hand control to fork.
+    safeClose(fds[1]); // Close Writing descriptor to hand control to fork.
     return fds[0];
 }
 
+/* Links and actively launches programs in a pipe. If only one program, it reads
+ * from stdin and outputs to stdout. If several programs are piped, the first 
+ * program reads from stdin, and writes to the writing-fd of the pipe. The 
+ * reading-fd gets returned and given as the next stdin of the following program.
+ * the last program is set to write to stdout unless explicity redirected */
 static int evalPipeSequence() {
     int fd_in = STDIN_FILENO;
     Program *p = parseProgram(), *next = NULL;
@@ -250,7 +220,6 @@ static int evalPipeSequence() {
 void evalQueue () {
     int pid, status;
     Item item;
-    //printf("-------------------- Evaluating --------------------\n");
 
     // If nothing is in the queue, don't process it.
     if (queueSize() <= 0) {
@@ -259,23 +228,17 @@ void evalQueue () {
 
     // Process the pipe-sequence. Obtain PID of last program.
     pid = evalPipeSequence();
-    //printf("\nLast PID = %d...\n\n", pid);
-    // Dequeue potential separator. 
-    // If separator exists and is "&" -> fork the shell.
-    //  - If child of fork -> wait on PID.
-    //  - If parent -> return.
-    // Else separator not exists or is ";" -> wait on PID.
+
+    // Dequeue possible separator. If "&" then fork shell. Otherwise wait.
     if (!IS_NULL((item = dequeue())) && item.type == AMPERSAND) {
-        //printf("Done: PID = %d, MODE = ASYNC\n", pid);
         if (fork() == 0) {
             waitpid(pid, &status, 0);
             exit(0);
         }
     } else {
-        //printf("Done: PID = %d, MODE = SERIAL\n", pid);
         waitpid(pid, &status, 0);
     }
-    //printf("Check: Queue Empty ? %s\n", queueSize() == 0 ? "Yes" : "No");
-    //printf("-------------------- ---------- --------------------\n");
+
+    // Print prompt token.
     printf("iwish$ ");
 }

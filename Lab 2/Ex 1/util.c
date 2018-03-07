@@ -58,6 +58,58 @@ static void initEnvPaths () {
 
 /*
 *******************************************************************************
+*                           Syscall Utility Routines                          *
+*******************************************************************************
+*/
+
+/* Closes file-descriptor. Aborts with message on error */
+void safeClose (int fd) {
+    if (close(fd) == -1) {
+        fprintf(stderr, "Error (close): \"%s\"\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+}
+
+/* Opens file with flags. Aborts with message on error */
+int safeOpen (const char *fileName, int flags) {
+    int fd;
+    if ((fd = open(fileName, flags)) == -1) {
+        fprintf(stderr, "Error (open): \"%s\"\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
+
+/* Opens file with flags and mode. Aborts with message on error */
+int safeOpenMode (const char *fileName, int flags, mode_t mode) {
+    int fd;
+    if ((fd = open(fileName, flags, mode)) == -1) {
+        fprintf(stderr, "Error (openMode): \"%s\"\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
+
+/* Opens pipe with given buffer. Aborts with message on error */
+void safePipe(int pipefds[2]) {
+    if (pipe(pipefds) == -1) {
+        fprintf(stderr, "Error (pipe): \"%s\"\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+}
+
+/* Copies a file descriptor. Aborts with message on error */
+int safeDup2 (int oldfd, int newfd) {
+    int fd;
+    if ((fd = dup2(oldfd, newfd)) == -1) {
+        fprintf(stderr, "Error (dup2): \"%s\"\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
+
+/*
+*******************************************************************************
 *                               Utility Routines                              *
 *******************************************************************************
 */
