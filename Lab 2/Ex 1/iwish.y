@@ -89,6 +89,9 @@ word                : WORD                          { enqueue((Item){WORD, putSt
 
 int main (void) {
 
+    // Print prompt token.
+    printf("iwish$ ");
+
     // Run the input.
     yyparse();
 
