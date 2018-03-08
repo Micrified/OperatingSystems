@@ -1,0 +1,9 @@
+void procPingPong(const int whoami, int *sharedTurnVariable) {
+    for(int count = 0; count < 5; ++count) {
+        while(whoami != *sharedTurnVariable)
+            ; //busy waiting
+        printf(whoami == 0 ? "Ping\n" : "...Pong\n");
+        *sharedTurnVariable = 1 - whoami;
+    }
+    exit(EXIT_SUCCESS);
+}
