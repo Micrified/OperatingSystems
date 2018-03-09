@@ -15,6 +15,9 @@
 #define A_WHOAMI        0
 #define B_WHOAMI        1
 
+// The identity of the child.
+int childIdentity;
+
 // The size of a page.
 int pagesize;
 
@@ -40,20 +43,22 @@ int sigsegReason = NO_READ;
 void sigsegHandler (int sig, siginfo_t *si, void *ignr) {
     int bytes;
     if (sigsegReason == NO_READ) {
-        fprintf(stdout, "[ %d ] :: Segfault (no read?) Setting READ protections!\n", getpid());
         if (mprotect(si->si_addr, pagesize, PROT_READ) == -1) {
             fprintf(stderr, "[ %d ] ALERT: Bad mprotect when setting PROT_READ!\n", getpid());   
         }
     } else {
         // SEND DATA (which you can read) TO PARENT.
-        fprintf(stdout, "[ %d ] :: Segfault (no write?) Setting, Then Sending data!\n", getpid());
         if (mprotect(si->si_addr, pagesize, PROT_WRITE) == -1) {
             fprintf(stderr, "[ %d ] :: ALERT: Bad mprotect when setting PROT_WRITE!\n", getpid());
         }
+
+        // Inversion (due to write-signal behavior)
+        int *p = shared;
+        *p = 1 - childIdentity;
+
+
         if ((bytes = write(out_fd, shared, pagesize)) != pagesize) {
             fprintf(stderr, "[ %d ] :: ALERT: Bad write. Bytes = %d\n", getpid(), bytes);
-        } else {
-            fprintf(stdout, "[ %d ] :: Sent to parent on (fd = %d)!\n", getpid(), out_fd);
         }
     }
     sigsegReason = 1 - sigsegReason; // Invert reason for next catch.
@@ -61,11 +66,13 @@ void sigsegHandler (int sig, siginfo_t *si, void *ignr) {
 
 /* Parent Synchronization Interrupt */
 void sigsyncHandler (int sig, siginfo_t *si, void *ignr) {
-    fprintf(stdout, "[ %d ] :: Sync call. Reading in!\n", getpid());
     mprotect(shared, pagesize, PROT_WRITE); // Temporarily allow writes.
     // READ DATA (from parent pipe) INTO SHARED.
     if (read(in_fd, shared, pagesize) != pagesize) {
         fprintf(stdout, "[ %d ] :: Problem reading data?\n", getpid());
+    } else {
+        int *p = shared;
+        int v = *p;
     }
     mprotect(shared, pagesize, PROT_READ); // Re-enable to read-only (assumes its stuck busy waiting).
 }
@@ -79,6 +86,7 @@ void sigsyncHandler (int sig, siginfo_t *si, void *ignr) {
 // Set whoami when calling. sharedTurnVariable is just "shared" alias in global.
 void pingPong (const int whoami, int *sharedTurnVariable) {
     for (int count = 0; count < 5; count++) {
+        mprotect(shared, pagesize, PROT_READ);
         while (whoami != *sharedTurnVariable)
             ; // Busy waiting.
         printf(whoami == 0 ? "Ping\n" : "...Pong\n");
@@ -97,47 +105,37 @@ void pingPong (const int whoami, int *sharedTurnVariable) {
  * 1. Both a_out and b_out should be non-blocking.
 */
 void parentProcess (int a_pid, int b_pid, int to_a, int from_a, int to_b, int from_b) {
-    int bytes;
+    int bytes = 0;
     int turn = 0; // Start with waiting on A. 
     // Check (nonblocking) if children are still going. 
     // waitpid returns zero for childs whose state hasn't changed if WNOHANG specified.
     // I interpret this as meaning they are still open.
-    fprintf(stdout, "[Parent %d] :: Waiting for %d and %d to finish pingpong!\n", getpid(), a_pid, b_pid);
-    fprintf(stdout, "[Parent %d] :: Watching file-descriptors a_in [%d] and b_in [%d] for data!\n", getpid(), from_a, from_b);
     while (waitpid(a_pid, NULL, WNOHANG) == 0 && waitpid(b_pid, NULL, WNOHANG) == 0) {
 
         // Check A. 
         if (turn == 0 && (bytes = read(from_a, shared, pagesize)) == pagesize) {
-            fprintf(stdout, "[Parent %d] :: Read something from A -> Trying to write now.\n", getpid());
             if (write(to_b, shared, pagesize) == pagesize) {
                 kill(b_pid, SIGALRM); // Make B sync.
-                fprintf(stdout, "[Parent %d] :: Sent SIGALRM to B!\n", getpid());
+              
             } else {
-                fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write A's message to B!\n", getpid());
+               fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write A's message to B!\n", getpid());
             }
-        } else {
-            //fprintf(stdout, "[Parent %d] :: Read %d from A.\n", getpid(), bytes);
         }
 
         // Check B.
         if (turn == 1 && (bytes = read(from_b, shared, pagesize)) == pagesize) {
-            fprintf(stdout, "[Parent %d] :: Read something from B -> Trying to write now.\n", getpid());
             if (write(to_a, shared, pagesize) == pagesize) {
                 kill(a_pid, SIGALRM); // Make A sync.
-                fprintf(stdout, "[Parent %d] :: Sent SIGALRM to A!\n", getpid());
             } else {
                 fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write B's message to A!\n", getpid());
             }
-        } else {
-            //fprintf(stdout, "[Parent %d] :: Read %d from B.\n", getpid(), bytes);
-        }
+        } 
         turn = 1 - turn;
 
         if (bytes == -1) {
             fprintf(stderr, "[Parent %d] :: Error reading from pipes -> \"%s\"\n", getpid(), strerror(errno));
             exit(EXIT_FAILURE);
         }
-        //fprintf(stdout, "[Parent %d] :: Looping again -->!\n", getpid());
     }
 
     exit(EXIT_SUCCESS);
@@ -171,13 +169,6 @@ void parentCloseAllExcept (int to_a_idx, int from_a_idx, int to_b_idx, int from_
     }
 }
 
-/* Sets a file-descriptor to be non-blocking */
-void setNonBlocking (int fd) {
-    fprintf(stdout, "[Parent %d] :: File-Descriptor %d set to non-blocking!\n", getpid(), fd);
-    int flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-}
-
 int main (void) {
 
     /*
@@ -196,14 +187,14 @@ int main (void) {
     }
 
     // Set the initial value of shared (hopefully write-able at this point).
-    //shared = 0;
+    memset(shared, 0, pagesize);
 
     // Set initial protection to PROT_READ (read-only).
-    if (mprotect(shared, pagesize, PROT_READ) == -1) {
-        fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
+    if (mprotect(shared, pagesize, PROT_NONE) == -1) {
+       fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
         exit(EXIT_FAILURE);
     }
-    fprintf(stdout, "[Parent %d] :: Page Setup Done (pagesize = %d)\n", getpid(), pagesize);
+   // fprintf(stdout, "[Parent %d] :: Page Setup Done (pagesize = %d)\n", getpid(), pagesize);
     /*
      **************************************************************************
      *                          Shared Signal Handlers                        *
@@ -245,20 +236,16 @@ int main (void) {
     // Create pipes.
     int wasErr = pipe(pds) + pipe(pds + 2) + pipe(pds + 4) + pipe(pds + 6);
     if (wasErr != 0) {
-        fprintf(stderr, "Error creating the pipes in parent!\n");
+         fprintf(stderr, "Error creating the pipes in parent!\n");
         exit(EXIT_FAILURE);
     }
-
-    // Make sure that pipes that the parent checks (incoming from A and B) are set to not block.
-    //setNonBlocking(pds[2]); // Reading port on which A will write to the parent
-    //setNonBlocking(pds[6]); // Reading port on which B will write to the parent
 
     // A: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
     if ((a_pid = fork()) == 0) {
         in_fd = pds[0];
         out_fd = pds[3];
         childCloseAllExcept(0, 3, pds); // Note: uses indices not fds.
-        fprintf(stdout, "[Child A: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
+        childIdentity = A_WHOAMI;
         pingPong(A_WHOAMI, shared);
     }
 
@@ -266,17 +253,20 @@ int main (void) {
     if ((b_pid = fork()) == 0) {
         in_fd = pds[4];
         out_fd = pds[7];
-        childCloseAllExcept(4, 7, pds);
-        fprintf(stdout, "[Child B: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
+        childCloseAllExcept(4, 7, pds); // Note: uses indices not fds.
+        childIdentity = B_WHOAMI;
         pingPong(B_WHOAMI, shared);
     }
 
+        // Set parent buffer protections.
+    if (mprotect(shared, pagesize, PROT_WRITE | PROT_READ) == -1) {
+        fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
+        exit(EXIT_FAILURE);
+    }
 
     // Close all irrelevant desciptors to the parent (to_A, from_A, to_B, from_B).
     parentCloseAllExcept(1,2,5,6, pds); 
 
-    fprintf(stdout, "[Parent %d] :: Closing all descriptors except [%d, %d, %d, %d]!\n", getpid(), pds[1], pds[2], pds[5], pds[6]);
-
-    // Launch parent program.
+    // Launch parent program: (int a_pid, int b_pid, int to_a, int from_a, int to_b, int from_b)
     parentProcess(a_pid, b_pid, pds[1], pds[2], pds[5], pds[6]);
 }
