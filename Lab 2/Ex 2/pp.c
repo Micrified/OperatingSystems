@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
@@ -43,11 +42,13 @@ int sigsegReason = NO_READ;
 void sigsegHandler (int sig, siginfo_t *si, void *ignr) {
     int bytes;
     if (sigsegReason == NO_READ) {
+        //fprintf(stdout, "[ %d ] :: Segfault (no read?) Setting READ protections!\n", getpid());
         if (mprotect(si->si_addr, pagesize, PROT_READ) == -1) {
             fprintf(stderr, "[ %d ] ALERT: Bad mprotect when setting PROT_READ!\n", getpid());   
         }
     } else {
         // SEND DATA (which you can read) TO PARENT.
+        //fprintf(stdout, "[ %d ] :: Segfault (no write?) Setting, Then Sending data!\n", getpid());
         if (mprotect(si->si_addr, pagesize, PROT_WRITE) == -1) {
             fprintf(stderr, "[ %d ] :: ALERT: Bad mprotect when setting PROT_WRITE!\n", getpid());
         }
@@ -66,14 +67,15 @@ void sigsegHandler (int sig, siginfo_t *si, void *ignr) {
 
 /* Parent Synchronization Interrupt */
 void sigsyncHandler (int sig, siginfo_t *si, void *ignr) {
-    mprotect(shared, pagesize, PROT_WRITE); // Temporarily allow writes.
+    if (mprotect(shared, pagesize, PROT_WRITE) == -1) {
+        fprintf(stderr, "[ %d ] :: Problem setting protections to PROT_WRITE! Reason = \"%s\"\n", getpid(), strerror(errno));
+    } 
+    // Temporarily allow writes.
     // READ DATA (from parent pipe) INTO SHARED.
     if (read(in_fd, shared, pagesize) != pagesize) {
         fprintf(stdout, "[ %d ] :: Problem reading data?\n", getpid());
-    } else {
-        int *p = shared;
-        int v = *p;
     }
+
     mprotect(shared, pagesize, PROT_READ); // Re-enable to read-only (assumes its stuck busy waiting).
 }
 
@@ -116,9 +118,8 @@ void parentProcess (int a_pid, int b_pid, int to_a, int from_a, int to_b, int fr
         if (turn == 0 && (bytes = read(from_a, shared, pagesize)) == pagesize) {
             if (write(to_b, shared, pagesize) == pagesize) {
                 kill(b_pid, SIGALRM); // Make B sync.
-              
             } else {
-               fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write A's message to B!\n", getpid());
+                fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write A's message to B!\n", getpid());
             }
         }
 
@@ -129,9 +130,12 @@ void parentProcess (int a_pid, int b_pid, int to_a, int from_a, int to_b, int fr
             } else {
                 fprintf(stdout, "[Parent %d] :: ALERT! Couldn't write B's message to A!\n", getpid());
             }
-        } 
+        }
+
+        // Invert turn.
         turn = 1 - turn;
 
+        // Check for read error.
         if (bytes == -1) {
             fprintf(stderr, "[Parent %d] :: Error reading from pipes -> \"%s\"\n", getpid(), strerror(errno));
             exit(EXIT_FAILURE);
@@ -191,10 +195,10 @@ int main (void) {
 
     // Set initial protection to PROT_READ (read-only).
     if (mprotect(shared, pagesize, PROT_NONE) == -1) {
-       fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
+        fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
         exit(EXIT_FAILURE);
     }
-   // fprintf(stdout, "[Parent %d] :: Page Setup Done (pagesize = %d)\n", getpid(), pagesize);
+
     /*
      **************************************************************************
      *                          Shared Signal Handlers                        *
@@ -236,8 +240,18 @@ int main (void) {
     // Create pipes.
     int wasErr = pipe(pds) + pipe(pds + 2) + pipe(pds + 4) + pipe(pds + 6);
     if (wasErr != 0) {
-         fprintf(stderr, "Error creating the pipes in parent!\n");
+        fprintf(stderr, "Error creating the pipes in parent!\n");
         exit(EXIT_FAILURE);
+    }
+
+    // B: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
+    if ((b_pid = fork()) == 0) {
+        in_fd = pds[4];
+        out_fd = pds[7];
+        childCloseAllExcept(4, 7, pds);
+        //fprintf(stdout, "[Child B: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
+        childIdentity = B_WHOAMI;
+        pingPong(B_WHOAMI, shared);
     }
 
     // A: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
@@ -245,20 +259,12 @@ int main (void) {
         in_fd = pds[0];
         out_fd = pds[3];
         childCloseAllExcept(0, 3, pds); // Note: uses indices not fds.
+        //fprintf(stdout, "[Child A: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
         childIdentity = A_WHOAMI;
         pingPong(A_WHOAMI, shared);
     }
 
-    // B: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
-    if ((b_pid = fork()) == 0) {
-        in_fd = pds[4];
-        out_fd = pds[7];
-        childCloseAllExcept(4, 7, pds); // Note: uses indices not fds.
-        childIdentity = B_WHOAMI;
-        pingPong(B_WHOAMI, shared);
-    }
-
-        // Set parent buffer protections.
+    // Set parent buffer protections.
     if (mprotect(shared, pagesize, PROT_WRITE | PROT_READ) == -1) {
         fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
         exit(EXIT_FAILURE);
@@ -266,6 +272,9 @@ int main (void) {
 
     // Close all irrelevant desciptors to the parent (to_A, from_A, to_B, from_B).
     parentCloseAllExcept(1,2,5,6, pds); 
+
+    // Delay the parent a bit to let all forks be started.
+    sleep(1);
 
     // Launch parent program: (int a_pid, int b_pid, int to_a, int from_a, int to_b, int from_b)
     parentProcess(a_pid, b_pid, pds[1], pds[2], pds[5], pds[6]);
