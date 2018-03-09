@@ -89,8 +89,9 @@ void sigsyncHandler (int sig, siginfo_t *si, void *ignr) {
 void pingPong (const int whoami, int *sharedTurnVariable) {
     for (int count = 0; count < 5; count++) {
         mprotect(shared, pagesize, PROT_READ);
-        while (whoami != *sharedTurnVariable)
-            ; // Busy waiting.
+        while (whoami != *sharedTurnVariable) {
+            sleep(1);
+        }
         printf(whoami == 0 ? "Ping\n" : "...Pong\n");
         *sharedTurnVariable = 1 - whoami;
     }
@@ -116,6 +117,7 @@ void parentProcess (int a_pid, int b_pid, int to_a, int from_a, int to_b, int fr
 
         // Check A. 
         if (turn == 0 && (bytes = read(from_a, shared, pagesize)) == pagesize) {
+            //fprintf(stdout, "[Parent %d] :: Read bytes from A. Sending to B!\n", getpid());
             if (write(to_b, shared, pagesize) == pagesize) {
                 kill(b_pid, SIGALRM); // Make B sync.
             } else {
@@ -125,6 +127,7 @@ void parentProcess (int a_pid, int b_pid, int to_a, int from_a, int to_b, int fr
 
         // Check B.
         if (turn == 1 && (bytes = read(from_b, shared, pagesize)) == pagesize) {
+            //fprintf(stdout, "[Parent %d] :: Read bytes from B. Sending to A!\n", getpid());
             if (write(to_a, shared, pagesize) == pagesize) {
                 kill(a_pid, SIGALRM); // Make A sync.
             } else {
@@ -193,7 +196,7 @@ int main (void) {
     // Set the initial value of shared (hopefully write-able at this point).
     memset(shared, 0, pagesize);
 
-    // Set initial protection to PROT_READ (read-only).
+    // Set initial protection to PROT_NONE (no rights).
     if (mprotect(shared, pagesize, PROT_NONE) == -1) {
         fprintf(stderr, "[Parent %d] :: Memory protection failed!\n", getpid());
         exit(EXIT_FAILURE);
@@ -247,27 +250,28 @@ int main (void) {
     /*************************************************************************/
 
 
-    // B: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
-    if ((b_pid = fork()) == 0) {
-        in_fd = pds[4];
-        out_fd = pds[7];
-        childCloseAllExcept(4, 7, pds);
-        fprintf(stdout, "[Child B: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
-        childIdentity = B_WHOAMI;
-        pingPong(B_WHOAMI, shared);
-    }
-
-    /******************* Swap Code Sections if Blocks! **********************/
-
     // A: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
     if ((a_pid = fork()) == 0) {
         in_fd = pds[0];
         out_fd = pds[3];
         childCloseAllExcept(0, 3, pds); // Note: uses indices not fds.
-        fprintf(stdout, "[Child A: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
+        //fprintf(stdout, "[Child A: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
         childIdentity = A_WHOAMI;
         pingPong(A_WHOAMI, shared);
     }
+
+
+    // B: Fork, Set (I/O), Close irrelevant descriptors. Run pingpong.
+    if ((b_pid = fork()) == 0) {
+        in_fd = pds[4];
+        out_fd = pds[7];
+        childCloseAllExcept(4, 7, pds);
+        //fprintf(stdout, "[Child B: %d] :: Reading from %d and writing to %d!\n", getpid(), in_fd, out_fd);
+        childIdentity = B_WHOAMI;
+        pingPong(B_WHOAMI, shared);
+    }
+
+    /******************* Swap Code Sections if Blocks! **********************/
 
     /*************************************************************************/
 
@@ -281,7 +285,6 @@ int main (void) {
     parentCloseAllExcept(1,2,5,6, pds); 
 
     // Delay the parent a bit to let all forks be started.
-    sleep(1);
 
     // Launch parent program: (int a_pid, int b_pid, int to_a, int from_a, int to_b, int from_b)
     parentProcess(a_pid, b_pid, pds[1], pds[2], pds[5], pds[6]);
