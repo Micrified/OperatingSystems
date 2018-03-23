@@ -6,12 +6,7 @@ utctime.c
 #include <sys/cdefs.h>
 #include "namespace.h"
 #include <lib.h>
-
-#include <sys/time.h>
-
-#ifdef __weak_alias
-__weak_alias(utctime, _utctime)
-#endif
+#include <time.h>
 
 time_t utctime (time_t *tp) {
     message m;

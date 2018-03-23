@@ -98,7 +98,7 @@ static time_t toUTC (time_t elapsed) {
 }
 
 /* Returns UNIX time adjusted for leap seconds */
-int do_utctime() {
+int do_utctime(void) {
     clock_t uptime, boottime;
     int s;
 

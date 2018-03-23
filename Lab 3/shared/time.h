@@ -1,8 +1,13 @@
-/*	$NetBSD: time.h,v 1.65 2011/10/27 16:12:52 christos Exp $	*/
+/*	$NetBSD: time.h,v 1.41 2012/10/02 01:42:06 christos Exp $	*/
 
 /*
- * Copyright (c) 1982, 1986, 1993
+ * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
+ * (c) UNIX System Laboratories, Inc.
+ * All or some portions of this file are derived from material licensed
+ * to the University of California by American Telephone and Telegraph
+ * Co. or Unix System Laboratories, Inc. and are reproduced herein with
+ * the permission of UNIX System Laboratories, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,273 +33,207 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	@(#)time.h	8.5 (Berkeley) 5/4/95
+ *	@(#)time.h	8.3 (Berkeley) 1/21/94
  */
 
-#ifndef _SYS_TIME_H_
-#define	_SYS_TIME_H_
-
-#include <sys/featuretest.h>
-#include <sys/types.h>
-
-/*
- * Structure returned by gettimeofday(2) system call,
- * and used in other calls.
- */
-struct timeval {
-	time_t    	tv_sec;		/* seconds */
-	suseconds_t	tv_usec;	/* and microseconds */
-};
-
-/*
- * Structure defined by POSIX.1b to be like a timeval.
- */
-struct timespec {
-	time_t	tv_sec;		/* seconds */
-	long	tv_nsec;	/* and nanoseconds */
-};
-
-#if defined(_NETBSD_SOURCE)
-#define	TIMEVAL_TO_TIMESPEC(tv, ts) do {				\
-	(ts)->tv_sec = (tv)->tv_sec;					\
-	(ts)->tv_nsec = (tv)->tv_usec * 1000;				\
-} while (/*CONSTCOND*/0)
-#define	TIMESPEC_TO_TIMEVAL(tv, ts) do {				\
-	(tv)->tv_sec = (ts)->tv_sec;					\
-	(tv)->tv_usec = (suseconds_t)(ts)->tv_nsec / 1000;		\
-} while (/*CONSTCOND*/0)
-
-/*
- * Note: timezone is obsolete. All timezone handling is now in
- * userland. Its just here for back compatibility.
- */
-struct timezone {
-	int	tz_minuteswest;	/* minutes west of Greenwich */
-	int	tz_dsttime;	/* type of dst correction */
-};
-
-/* Operations on timevals. */
-#define	timerclear(tvp)		(tvp)->tv_sec = (tvp)->tv_usec = 0L
-#define	timerisset(tvp)		((tvp)->tv_sec || (tvp)->tv_usec)
-#define	timercmp(tvp, uvp, cmp)						\
-	(((tvp)->tv_sec == (uvp)->tv_sec) ?				\
-	    ((tvp)->tv_usec cmp (uvp)->tv_usec) :			\
-	    ((tvp)->tv_sec cmp (uvp)->tv_sec))
-#define	timeradd(tvp, uvp, vvp)						\
-	do {								\
-		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;		\
-		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;	\
-		if ((vvp)->tv_usec >= 1000000) {			\
-			(vvp)->tv_sec++;				\
-			(vvp)->tv_usec -= 1000000;			\
-		}							\
-	} while (/* CONSTCOND */ 0)
-#define	timersub(tvp, uvp, vvp)						\
-	do {								\
-		(vvp)->tv_sec = (tvp)->tv_sec - (uvp)->tv_sec;		\
-		(vvp)->tv_usec = (tvp)->tv_usec - (uvp)->tv_usec;	\
-		if ((vvp)->tv_usec < 0) {				\
-			(vvp)->tv_sec--;				\
-			(vvp)->tv_usec += 1000000;			\
-		}							\
-	} while (/* CONSTCOND */ 0)
-
-/*
- * hide bintime for _STANDALONE because this header is used for hpcboot.exe,
- * which is built with compilers which don't recognize LL suffix.
- *	http://mail-index.NetBSD.org/tech-userlevel/2008/02/27/msg000181.html
- */
-#if !defined(_STANDALONE)
-struct bintime {
-	time_t	sec;
-	uint64_t frac;
-};
-
-static __inline void
-bintime_addx(struct bintime *bt, uint64_t x)
-{
-	uint64_t u;
-
-	u = bt->frac;
-	bt->frac += x;
-	if (u > bt->frac)
-		bt->sec++;
-}
-
-static __inline void
-bintime_add(struct bintime *bt, const struct bintime *bt2)
-{
-	uint64_t u;
-
-	u = bt->frac;
-	bt->frac += bt2->frac;
-	if (u > bt->frac)
-		bt->sec++;
-	bt->sec += bt2->sec;
-}
-
-static __inline void
-bintime_sub(struct bintime *bt, const struct bintime *bt2)
-{
-	uint64_t u;
-
-	u = bt->frac;
-	bt->frac -= bt2->frac;
-	if (u < bt->frac)
-		bt->sec--;
-	bt->sec -= bt2->sec;
-}
-
-/*-
- * Background information:
- *
- * When converting between timestamps on parallel timescales of differing
- * resolutions it is historical and scientific practice to round down rather
- * than doing 4/5 rounding.
- *
- *   The date changes at midnight, not at noon.
- *
- *   Even at 15:59:59.999999999 it's not four'o'clock.
- *
- *   time_second ticks after N.999999999 not after N.4999999999
- */
-
-static __inline void
-bintime2timespec(const struct bintime *bt, struct timespec *ts)
-{
-
-	ts->tv_sec = bt->sec;
-	ts->tv_nsec =
-	    (long)(((uint64_t)1000000000 * (uint32_t)(bt->frac >> 32)) >> 32);
-}
-
-static __inline void
-timespec2bintime(const struct timespec *ts, struct bintime *bt)
-{
-
-	bt->sec = ts->tv_sec;
-	/* 18446744073 = int(2^64 / 1000000000) */
-	bt->frac = ts->tv_nsec * (uint64_t)18446744073LL; 
-}
-
-static __inline void
-bintime2timeval(const struct bintime *bt, struct timeval *tv)
-{
-
-	tv->tv_sec = bt->sec;
-	tv->tv_usec =
-	    (suseconds_t)(((uint64_t)1000000 * (uint32_t)(bt->frac >> 32)) >> 32);
-}
-
-static __inline void
-timeval2bintime(const struct timeval *tv, struct bintime *bt)
-{
-
-	bt->sec = tv->tv_sec;
-	/* 18446744073709 = int(2^64 / 1000000) */
-	bt->frac = tv->tv_usec * (uint64_t)18446744073709LL;
-}
-#endif /* !defined(_STANDALONE) */
-
-/* Operations on timespecs. */
-#define	timespecclear(tsp)	(tsp)->tv_sec = (time_t)((tsp)->tv_nsec = 0L)
-#define	timespecisset(tsp)	((tsp)->tv_sec || (tsp)->tv_nsec)
-#define	timespeccmp(tsp, usp, cmp)					\
-	(((tsp)->tv_sec == (usp)->tv_sec) ?				\
-	    ((tsp)->tv_nsec cmp (usp)->tv_nsec) :			\
-	    ((tsp)->tv_sec cmp (usp)->tv_sec))
-#define	timespecadd(tsp, usp, vsp)					\
-	do {								\
-		(vsp)->tv_sec = (tsp)->tv_sec + (usp)->tv_sec;		\
-		(vsp)->tv_nsec = (tsp)->tv_nsec + (usp)->tv_nsec;	\
-		if ((vsp)->tv_nsec >= 1000000000L) {			\
-			(vsp)->tv_sec++;				\
-			(vsp)->tv_nsec -= 1000000000L;			\
-		}							\
-	} while (/* CONSTCOND */ 0)
-#define	timespecsub(tsp, usp, vsp)					\
-	do {								\
-		(vsp)->tv_sec = (tsp)->tv_sec - (usp)->tv_sec;		\
-		(vsp)->tv_nsec = (tsp)->tv_nsec - (usp)->tv_nsec;	\
-		if ((vsp)->tv_nsec < 0) {				\
-			(vsp)->tv_sec--;				\
-			(vsp)->tv_nsec += 1000000000L;			\
-		}							\
-	} while (/* CONSTCOND */ 0)
-#define timespec2ns(x) (((uint64_t)(x)->tv_sec) * 1000000000L + (x)->tv_nsec)
-#endif /* _NETBSD_SOURCE */
-
-/*
- * Names of the interval timers, and structure
- * defining a timer setting.
- * NB: Must match the CLOCK_ constants below.
- */
-#define	ITIMER_REAL		0
-#define	ITIMER_VIRTUAL		1
-#define	ITIMER_PROF		2
-#define	ITIMER_MONOTONIC	3
-
-struct	itimerval {
-	struct	timeval it_interval;	/* timer interval */
-	struct	timeval it_value;	/* current value */
-};
-
-/*
- * Structure defined by POSIX.1b to be like a itimerval, but with
- * timespecs. Used in the timer_*() system calls.
- */
-struct	itimerspec {
-	struct	timespec it_interval;
-	struct	timespec it_value;
-};
-
-#ifndef __minix
-#define	CLOCK_REALTIME	0
-#define	CLOCK_VIRTUAL	1
-#define	CLOCK_PROF	2
-#define	CLOCK_MONOTONIC	3
-#endif
-
-#if defined(_NETBSD_SOURCE)
-#define	TIMER_RELTIME	0x0	/* relative timer */
-#endif
-#define	TIMER_ABSTIME	0x1	/* absolute timer */
-
-#ifdef _KERNEL
-#include <sys/timevar.h>
-#else /* !_KERNEL */
-#ifndef _STANDALONE
-#if (_POSIX_C_SOURCE - 0) >= 200112L || \
-    (defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE_EXTENDED)) || \
-    (_XOPEN_SOURCE - 0) >= 500 || defined(_NETBSD_SOURCE)
-#include <sys/select.h>
-#endif
+#ifndef _TIME_H_
+#define	_TIME_H_
 
 #include <sys/cdefs.h>
-#include <time.h>
+#include <sys/featuretest.h>
+#include <machine/ansi.h>
+
+#include <sys/null.h>
+
+#ifdef	_BSD_CLOCK_T_
+typedef	_BSD_CLOCK_T_	clock_t;
+#undef	_BSD_CLOCK_T_
+#endif
+
+#ifdef	_BSD_TIME_T_
+typedef	_BSD_TIME_T_	time_t;
+#undef	_BSD_TIME_T_
+#endif
+
+#ifdef	_BSD_SIZE_T_
+typedef	_BSD_SIZE_T_	size_t;
+#undef	_BSD_SIZE_T_
+#endif
+
+#ifdef	_BSD_CLOCKID_T_
+typedef	_BSD_CLOCKID_T_	clockid_t;
+#undef	_BSD_CLOCKID_T_
+#endif
+
+#ifndef __minix
+#ifdef	_BSD_TIMER_T_
+typedef	_BSD_TIMER_T_	timer_t;
+#undef	_BSD_TIMER_T_
+#endif
+#endif /* !__minix */
+
+#ifdef __minix
+#define CLOCKS_PER_SEC	60
+#else
+#define CLOCKS_PER_SEC	100
+#endif
+
+struct tm {
+	int	tm_sec;		/* seconds after the minute [0-61] */
+	int	tm_min;		/* minutes after the hour [0-59] */
+	int	tm_hour;	/* hours since midnight [0-23] */
+	int	tm_mday;	/* day of the month [1-31] */
+	int	tm_mon;		/* months since January [0-11] */
+	int	tm_year;	/* years since 1900 */
+	int	tm_wday;	/* days since Sunday [0-6] */
+	int	tm_yday;	/* days since January 1 [0-365] */
+	int	tm_isdst;	/* Daylight Savings Time flag */
+	long	tm_gmtoff;	/* offset from UTC in seconds */
+	__aconst char *tm_zone;	/* timezone abbreviation */
+};
 
 __BEGIN_DECLS
-#ifndef __LIBC12_SOURCE__
-#if (_POSIX_C_SOURCE - 0) >= 200112L || \
-    defined(_XOPEN_SOURCE) || defined(_NETBSD_SOURCE)
-int	getitimer(int, struct itimerval *) __RENAME(__getitimer50);
-int	gettimeofday(struct timeval * __restrict, void *__restrict);
-int	setitimer(int, const struct itimerval * __restrict,
-	    struct itimerval * __restrict) __RENAME(__setitimer50);
-#endif /* _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE || _NETBSD_SOURCE */
+char *asctime(const struct tm *);
 
-#if defined(_NETBSD_SOURCE) || defined(HAVE_NBTOOL_CONFIG_H)
-#ifndef __minix
-int	adjtime(const struct timeval *, struct timeval *) __RENAME(__adjtime50);
-int	futimes(int, const struct timeval [2]) __RENAME(__futimes50);
-int	lutimes(const char *, const struct timeval [2]) __RENAME(__lutimes50);
+clock_t clock(void);
+#ifndef __LIBC12_SOURCE__
+char *ctime(const time_t *) __RENAME(__ctime50);
+double difftime(time_t, time_t) __RENAME(__difftime50);
+struct tm *gmtime(const time_t *) __RENAME(__gmtime50);
+#ifndef __MINIX
+struct tm *localtime(const time_t *) __RENAME(__locatime50);
+#else
+struct tm *localtime(const time_t *) __RENAME(__localtime50);
+#endif
+time_t time(time_t *) __RENAME(__time50);
+time_t mktime(struct tm *) __RENAME(__mktime50);
+#endif
+size_t strftime(char * __restrict, size_t, const char * __restrict,
+    const struct tm * __restrict)
+    __attribute__((__format__(__strftime__, 3, 0)));
+
+#if defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE) || \
+    defined(_NETBSD_SOURCE)
+#ifndef __LIBC12_SOURCE__
+/*
+ * CLK_TCK uses libc's internal __sysconf() to retrieve the machine's
+ * HZ. The value of _SC_CLK_TCK is 39 -- we hard code it so we do not
+ * need to include unistd.h
+ */
+long __sysconf(int);
+#ifdef __minix
+#define CLK_TCK		(__sysconf(3))
+#else
+#define CLK_TCK		(__sysconf(39))
 #endif /* !__minix */
-int	settimeofday(const struct timeval * __restrict,
-	    const void *__restrict) __RENAME(__settimeofday50);
+#endif
+#endif
+
+extern __aconst char *tzname[2];
+#ifndef __LIBC12_SOURCE__
+void tzset(void) __RENAME(__tzset50);
+#endif
+
+/*
+ * X/Open Portability Guide >= Issue 4
+ */
+#if defined(_XOPEN_SOURCE) || defined(_NETBSD_SOURCE)
+extern int daylight;
+#ifndef __LIBC12_SOURCE__
+extern long int timezone __RENAME(__timezone13);
+#endif
+char *strptime(const char * __restrict, const char * __restrict,
+    struct tm * __restrict);
+#endif
+
+#if (defined(_XOPEN_SOURCE) && defined(_XOPEN_SOURCE_EXTENDED)) || \
+    defined(_NETBSD_SOURCE)
+struct tm *getdate(const char *);
+extern int getdate_err;
+#endif
+
+#if (_POSIX_C_SOURCE - 0) >= 199309L || (_XOPEN_SOURCE - 0) >= 500 || \
+    defined(_NETBSD_SOURCE)
+#include <sys/time.h>		/* XXX for struct timespec */
+struct sigevent;
+struct itimerspec;
+int clock_nanosleep(clockid_t, int, const struct timespec *, struct timespec *);
+#ifndef __LIBC12_SOURCE__
+#ifndef __minix
+int clock_getres(clockid_t, struct timespec *)
+    __RENAME(__clock_getres50);
+int clock_gettime(clockid_t, struct timespec *)
+    __RENAME(__clock_gettime50);
+int clock_settime(clockid_t, const struct timespec *)
+    __RENAME(__clock_settime50);
+#endif /* !__minix */
+int nanosleep(const struct timespec *, struct timespec *)
+    __RENAME(__nanosleep50);
+#ifndef __minix
+int timer_gettime(timer_t, struct itimerspec *) __RENAME(__timer_gettime50);
+int timer_settime(timer_t, int, const struct itimerspec * __restrict, 
+    struct itimerspec * __restrict) __RENAME(__timer_settime50);
+#endif /* !__minix */ 
+#endif
+#ifndef __minix
+int timer_create(clockid_t, struct sigevent * __restrict,
+    timer_t * __restrict);
+int timer_delete(timer_t);
+int timer_getoverrun(timer_t);
+#endif /* __minix */
+#endif /* _POSIX_C_SOURCE >= 199309 || _XOPEN_SOURCE >= 500 || ... */
+
+#if (_POSIX_C_SOURCE - 0) >= 199506L || (_XOPEN_SOURCE - 0) >= 500 || \
+    defined(_REENTRANT) || defined(_NETBSD_SOURCE)
+char *asctime_r(const struct tm * __restrict, char * __restrict);
+#ifndef __LIBC12_SOURCE__
+char *ctime_r(const time_t *, char *) __RENAME(__ctime_r50);
+struct tm *gmtime_r(const time_t * __restrict, struct tm * __restrict)
+    __RENAME(__gmtime_r50);
+struct tm *localtime_r(const time_t * __restrict, struct tm * __restrict)
+    __RENAME(__localtime_r50);
+#endif
+#endif
+
+#if defined(_NETBSD_SOURCE)
+
+typedef struct __state *timezone_t;
+
+#ifndef __LIBC12_SOURCE__
+time_t time2posix(time_t) __RENAME(__time2posix50);
+time_t posix2time(time_t) __RENAME(__posix2time50);
+time_t timegm(struct tm *) __RENAME(__timegm50);
+time_t timeoff(struct tm *, long) __RENAME(__timeoff50);
+time_t timelocal(struct tm *) __RENAME(__timelocal50);
+struct tm *offtime(const time_t *, long) __RENAME(__offtime50);
+void tzsetwall(void) __RENAME(__tzsetwall50);
+
+struct tm *offtime_r(const time_t *, long, struct tm *) __RENAME(__offtime_r50);
+struct tm *localtime_rz(const timezone_t, const time_t * __restrict,
+    struct tm * __restrict) __RENAME(__localtime_rz50);
+char *ctime_rz(const timezone_t, const time_t *, char *) __RENAME(__ctime_rz50);
+time_t mktime_z(const timezone_t, struct tm *) __RENAME(__mktime_z50);
+time_t timelocal_z(const timezone_t, struct tm *) __RENAME(__timelocal_z50);
+time_t time2posix_z(const timezone_t, time_t) __RENAME(__time2posix_z50);
+time_t posix2time_z(const timezone_t, time_t) __RENAME(__posix2time_z50);
+timezone_t tzalloc(const char *) __RENAME(__tzalloc50);
+void tzfree(const timezone_t) __RENAME(__tzfree50);
+const char *tzgetname(const timezone_t, int) __RENAME(__tzgetname50);
+#endif
+
+size_t strftime_z(const timezone_t, char * __restrict, size_t,
+    const char * __restrict, const struct tm * __restrict)
+    __attribute__((__format__(__strftime__, 4, 0)));
+
 #endif /* _NETBSD_SOURCE */
-#endif /* __LIBC12_SOURCE__ */
+
+#ifdef __minix
+int stime(time_t *_top);
+#endif /* __minix */
+
+/* UTC Time Library Wrapper Declaration */
+time_t utctime(time_t *);
+
 __END_DECLS
 
-#endif	/* !_STANDALONE */
-#endif /* !_KERNEL */
-#endif /* !_SYS_TIME_H_ */
+#endif /* !_TIME_H_ */
