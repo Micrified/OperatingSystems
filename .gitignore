@@ -58,3 +58,5 @@ dkms.conf
 shared_backup/
 # Virtualbox (again)
 *.ova
+# Scripts
+listGitObjectsBySize.sh
