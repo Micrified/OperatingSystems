@@ -56,3 +56,5 @@ dkms.conf
 *.vdi.gz
 # Ignored Folders
 shared_backup/
+# Virtualbox (again)
+*.ova
