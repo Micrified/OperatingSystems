@@ -1,0 +1,981 @@
+    r= dn_comp(qname, cp, arraysize(dns.data), dnvec, arraylimit(dnvec));
+               ^~~~~
+/usr/include/resolv.h:454:26: note: passing argument to parameter here
+int             dn_comp(const char *, u_char *, int, u_char **, u_char **);
+                                    ^
+nonamed.c:1114:16: warning: passing 'u8_t *' (aka 'unsigned char *') to parameter of type 'const char *'
+      converts between pointers to integer types with different sign [-Wpointer-sign]
+    r= dn_comp(qname, cp, arraylimit(dns.data) - cp, dnvec, arraylimit(dnvec));
+               ^~~~~
+/usr/include/resolv.h:454:26: note: passing argument to parameter here
+int             dn_comp(const char *, u_char *, int, u_char **, u_char **);
+                                    ^
+nonamed.c:1132:13: warning: passing 'u8_t *' (aka 'unsigned char *') to parameter of type 'const char *'
+      converts between pointers to integer types with different sign [-Wpointer-sign]
+        r= dn_comp((u8_t *) "%nameserver", cp, arraylimit(dns.data) - cp,
+                   ^~~~~~~~~~~~~~~~~~~~~~
+/usr/include/resolv.h:454:26: note: passing argument to parameter here
+int             dn_comp(const char *, u_char *, int, u_char **, u_char **);
+                                    ^
+nonamed.c:1172:55: warning: passing 'u8_t [1025]' to parameter of type 'char *' converts between pointers to
+      integer types with different sign [-Wpointer-sign]
+    r= dn_expand(dns2oct(dp), dns2oct(dp) + dlen, cp, name, MAXDNAME);
+                                                      ^~~~
+/usr/include/resolv.h:456:17: note: passing argument to parameter here
+                               char *, int);
+                                     ^
+nonamed.c:1238:55: warning: passing 'u8_t [1025]' to parameter of type 'char *' converts between pointers to
+      integer types with different sign [-Wpointer-sign]
+    r= dn_expand(dns2oct(dp), dns2oct(dp) + dlen, cp, name, MAXDNAME);
+                                                      ^~~~
+/usr/include/resolv.h:456:17: note: passing argument to parameter here
+                               char *, int);
+                                     ^
+nonamed.c:1381:16: warning: passing 'u8_t [1026]' to parameter of type 'char *' converts between pointers to
+      integer types with different sign [-Wpointer-sign]
+        qp->dns.data, qname, MAXDNAME);
+                      ^~~~~
+/usr/include/resolv.h:456:17: note: passing argument to parameter here
+                               char *, int);
+                                     ^
+nonamed.c:1388:16: warning: passing 'u8_t [1026]' to parameter of type 'const char *' converts between
+      pointers to integer types with different sign [-Wpointer-sign]
+    r= dn_comp(qname, cp, arraysize(udp.dns.data), dnvec, arraylimit(dnvec));
+               ^~~~~
+/usr/include/resolv.h:454:26: note: passing argument to parameter here
+int             dn_comp(const char *, u_char *, int, u_char **, u_char **);
+                                    ^
+nonamed.c:1441:12: warning: unused variable 'dtime' [-Wunused-variable]
+    time_t dtime;
+           ^
+21 warnings generated.
+paste.c:281:12: warning: array subscript is of type 'char' [-Wchar-subscripts]
+                                        delbuf[delbuf[0]] = *delimptr++;
+                                              ^~~~~~~~~~
+1 warning generated.
+ping.c:41:1: warning: type specifier missing, defaults to 'int' [-Wimplicit-int]
+main(argc, argv)
+^~~~
+ping.c:46:14: warning: unused variable 'result1' [-Wunused-variable]
+        int result, result1;
+                    ^
+ping.c:49:6: warning: unused variable 'ihl' [-Wunused-variable]
+        int ihl;
+            ^
+3 warnings generated.
+pr.c:370:9: warning: using the result of an assignment as a condition without parentheses [-Wparentheses]
+                if (p = (char *) L_BUF(i, j))
+                    ~~^~~~~~~~~~~~~~~~
+pr.c:370:9: note: place parentheses around the assignment to silence this warning
+                if (p = (char *) L_BUF(i, j))
+                      ^
+                    (                       )
+pr.c:370:9: note: use '==' to turn this assignment into an equality comparison
+                if (p = (char *) L_BUF(i, j))
+                      ^
+                      ==
+1 warning generated.
+sh_wall.c:77:2: warning: array index 18 is past the end of the array (which contains 18 elements)
+      [-Warray-bounds]
+        utmptty[5 + sizeof(utmp.ut_line) + 1] = 0;
+        ^       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sh_wall.c:32:3: note: array 'utmptty' declared here
+  char utmptty[5 + sizeof(utmp.ut_line) + 1];
+  ^
+1 warning generated.
+remsync.c:1212:9: warning: data argument not used by format string [-Wformat-extra-args]
+                                                                err);
+                                                                ^
+1 warning generated.
+rsh.c:344:14: warning: variable 'omask' is uninitialized when used here [-Wuninitialized]
+        talk(nflag, omask, pid, rem);
+                    ^~~~~
+rsh.c:117:12: note: initialize the variable 'omask' to silence this warning
+        long omask;
+                  ^
+                   = 0
+1 warning generated.
+rshd.c:73:16: warning: unused variable 'tcpattachopt' [-Wunused-variable]
+        nwio_tcpatt_t tcpattachopt;
+                      ^
+1 warning generated.
+systest.c:76:25: warning: argument to 'sizeof' in 'memset' call is the same expression as the destination; did
+      you mean to dereference it? [-Wsizeof-pointer-memaccess]
+  memset(res, 0, sizeof(res));
+         ~~~            ^~~
+1 warning generated.
+synctree.c:1433:28: warning: incompatible pointer types passing 'int (int *)' to parameter of type 'char *'
+      [-Wincompatible-pointer-types]
+                if (pipe(m2m) < 0) perrx(pipe);
+                                         ^~~~
+1 warning generated.
+synctree.o: In function `islink':
+synctree.c:(.text+0x1fb6): warning: warning: tmpnam() possibly used unsafely, use mkstemp() or mkdtemp()
+tcpd.c:236:11: warning: implicit declaration of function 'servxcheck' is invalid in C99
+      [-Wimplicit-function-declaration]
+                    && !servxcheck(tcpconf.nwtc_remaddr, service, NULL)
+                        ^
+1 warning generated.
+fetch.c:319:18: warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+        fprintf(stderr, prompt);
+                        ^~~~~~
+1 warning generated.
+rz.c:1060:9: warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+        printf(canistr);
+               ^~~~~~~
+rz.c:1280:42: warning: too few arguments in call to 'vfile'
+                        vfile("rzfile: zgethdr returned %d", c);
+                        ~~~~~                                 ^
+rz.c:1280:41: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                        vfile("rzfile: zgethdr returned %d", c);
+                                                             ^
+rz.c:1289:43: warning: too few arguments in call to 'vfile'
+                                vfile("rzfile: zgethdr returned %d", c);
+                                ~~~~~                                 ^
+rz.c:1289:42: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                                vfile("rzfile: zgethdr returned %d", c);
+                                                                     ^
+rz.c:1310:42: warning: too few arguments in call to 'vfile'
+                                vfile("rzfile: closeit returned <> 0");
+                                ~~~~~                                ^
+rz.c:1313:30: warning: too few arguments in call to 'vfile'
+                        vfile("rzfile: normal EOF");
+                        ~~~~~                     ^
+rz.c:1321:43: warning: too few arguments in call to 'vfile'
+                                vfile("rzfile: zgethdr returned %d", c);
+                                ~~~~~                                 ^
+rz.c:1321:42: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                                vfile("rzfile: zgethdr returned %d", c);
+                                                                     ^
+rz.c:1332:39: warning: too few arguments in call to 'vfile'
+                        vfile("rzfile: Sender SKIPPED file");
+                        ~~~~~                              ^
+rz.c:1364:43: warning: too few arguments in call to 'vfile'
+                                vfile("rzfile: zgethdr returned %d", c);
+                                ~~~~~                                 ^
+rz.c:1364:42: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                                vfile("rzfile: zgethdr returned %d", c);
+                                                                     ^
+rz.c:1372:44: warning: too few arguments in call to 'vfile'
+                                        vfile("rzfile: zgethdr returned %d", c);
+                                        ~~~~~                                 ^
+rz.c:1372:43: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                                        vfile("rzfile: zgethdr returned %d", c);
+                                                                             ^
+rz.c:1383:44: warning: too few arguments in call to 'vfile'
+                                        vfile("rzfile: zgethdr returned %d", c);
+                                        ~~~~~                                 ^
+rz.c:1383:43: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                                        vfile("rzfile: zgethdr returned %d", c);
+                                                                             ^
+rz.c:1494:18: warning: too few arguments in call to 'vfile'
+        vfile("ackbibi:");
+        ~~~~~           ^
+rz.c:1503:28: warning: too few arguments in call to 'vfile'
+                        vfile("ackbibi complete");
+                        ~~~~~                   ^
+In file included from rz.c:165:
+./rbsb.c:141:1: warning: unused function 'getspeed' [-Wunused-function]
+getspeed(code)
+^
+19 warnings generated.
+sz.c:1028:9: warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+        printf(canistr);
+               ^~~~~~~
+sz.c:1157:55: warning: too few arguments in call to 'vfile'
+                        vfile("Rxbuflen=%d Tframlen=%d", Rxbuflen, Tframlen);
+                        ~~~~~                                              ^
+sz.c:1157:37: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                        vfile("Rxbuflen=%d Tframlen=%d", Rxbuflen, Tframlen);
+                                                         ^~~~~~~~
+sz.c:1157:47: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                        vfile("Rxbuflen=%d Tframlen=%d", Rxbuflen, Tframlen);
+                                                                   ^~~~~~~~
+sz.c:1168:34: warning: too few arguments in call to 'vfile'
+                                vfile("Rxbuflen=%d", Rxbuflen);
+                                ~~~~~                        ^
+sz.c:1168:26: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                                vfile("Rxbuflen=%d", Rxbuflen);
+                                                     ^~~~~~~~
+sz.c:1177:33: warning: too few arguments in call to 'vfile'
+                        vfile("Rxbuflen=%d", Rxbuflen);
+                        ~~~~~                        ^
+sz.c:1177:25: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                        vfile("Rxbuflen=%d", Rxbuflen);
+                                             ^~~~~~~~
+sz.c:1220:51: warning: too few arguments in call to 'vfile'
+                        vfile("Rxbuflen=%d blklen=%d", Rxbuflen, blklen);
+                        ~~~~~                                          ^
+sz.c:1220:35: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                        vfile("Rxbuflen=%d blklen=%d", Rxbuflen, blklen);
+                                                       ^~~~~~~~
+sz.c:1220:45: warning: incompatible integer to pointer conversion passing 'int' to parameter of type 'char *';
+                        vfile("Rxbuflen=%d blklen=%d", Rxbuflen, blklen);
+                                                                 ^~~~~~
+sz.c:1221:57: warning: too few arguments in call to 'vfile'
+                        vfile("Txwindow = %u Txwspac = %d", Txwindow, Txwspac);
+                        ~~~~~                                                ^
+sz.c:1221:40: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                        vfile("Txwindow = %u Txwspac = %d", Txwindow, Txwspac);
+                                                            ^~~~~~~~
+sz.c:1221:50: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                        vfile("Txwindow = %u Txwspac = %d", Txwindow, Txwspac);
+                                                                      ^~~~~~~
+sz.c:1401:12: warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+                                printf(qbf); fflush(stdout);
+                                       ^~~
+sz.c:1492:47: warning: too few arguments in call to 'vfile'
+                                vfile("%ld window >= %u", tcount, Txwindow);
+                                ~~~~~                                     ^
+sz.c:1492:31: warning: incompatible integer to pointer conversion passing 'long' to parameter of type
+      'char *';
+                                vfile("%ld window >= %u", tcount, Txwindow);
+                                                          ^~~~~~
+sz.c:1492:39: warning: incompatible integer to pointer conversion passing 'unsigned int' to parameter of type
+      'char *';
+                                vfile("%ld window >= %u", tcount, Txwindow);
+                                                                  ^~~~~~~~
+sz.c:1504:32: warning: too few arguments in call to 'vfile'
+                        vfile("window = %ld", tcount);
+                        ~~~~~                       ^
+sz.c:1504:26: warning: incompatible integer to pointer conversion passing 'long' to parameter of type
+      'char *';
+                        vfile("window = %ld", tcount);
+                                              ^~~~~~
+sz.c:1654:31: warning: too few arguments in call to 'vfile'
+                        vfile("******** RZ *******");
+                        ~~~~~                      ^
+sz.c:1656:31: warning: too few arguments in call to 'vfile'
+                        vfile("******** SZ *******");
+                        ~~~~~                      ^
+In file included from sz.c:135:
+./rbsb.c:141:1: warning: unused function 'getspeed' [-Wunused-function]
+getspeed(code)
+^
+23 warnings generated.
+pwd_mkdb.c:686:1: warning: function 'mkpw_error' could be declared with attribute 'noreturn'
+      [-Wmissing-noreturn]
+{
+^
+pwd_mkdb.c:715:1: warning: function 'inconsistency' could be declared with attribute 'noreturn'
+      [-Wmissing-noreturn]
+{
+^
+2 warnings generated.
+clang: warning: argument unused during compilation: '-nodefaultlibs'
+install_master.c:41:1: warning: function 'fatal' could be declared with attribute 'noreturn'
+      [-Wmissing-noreturn]
+{
+^
+1 warning generated.
+/usr/src/usr.sbin/installboot/arch/i386.c:271:23: warning: passing 'const char *' to parameter of type
+      'const unsigned char *' converts between pointers to integer types with different sign [-Wpointer-sign]
+                        MD5Update(&md5ctx, params->password,
+                                           ^~~~~~~~~~~~~~~~
+/usr/include/md5.h:49:48: note: passing argument to parameter here
+void    MD5Update(MD5_CTX *, const unsigned char *, unsigned int);
+                                                  ^
+/usr/src/usr.sbin/installboot/arch/i386.c:291:15: warning: passing 'char *' to parameter of type
+      'const __uint8_t *' (aka 'const unsigned char *') converts between pointers to integer types with
+      different sign [-Wpointer-sign]
+        if (!is_zero((char *)&bp + bplen, sizeof bp - bplen)) {
+                     ^~~~~~~~~~~~~~~~~~~
+/usr/src/usr.sbin/installboot/arch/i386.c:223:24: note: passing argument to parameter 'p' here
+is_zero(const uint8_t *p, unsigned int len)
+                       ^
+2 warnings generated.
+vipw.c:146:1: warning: function 'usage' could be declared with attribute 'noreturn' [-Wmissing-noreturn]
+{
+^
+1 warning generated.
+mkproto.c:241:1: warning: function 'usage' could be declared with attribute 'noreturn' [-Wmissing-noreturn]
+{
+^
+1 warning generated.
+/usr/src/sys/arch/i386/stand/lib/biosdisk.c:241:22: warning: implicit declaration of function 'crc32' is
+      invalid in C99 [-Wimplicit-function-declaration]
+        gpth.hdr_crc_self = crc32(0, (const void *)&gpth, GPT_HDR_SIZE);
+                            ^
+1 warning generated.
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/cread.c:99:1: warning: no previous
+      prototype for function 'crc32' [-Wmissing-prototypes]
+crc32(uint32_t crc, const uint8_t *const buf, size_t len)
+^
+1 warning generated.
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile.c:100:3: warning: data argument
+      not used by format string [-Wformat-extra-args]
+                WARN(("open %s", fname ? fname : "<default>"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile.c:144:3: warning: data argument
+      not used by format string [-Wformat-extra-args]
+                WARN(("read header failed"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile.c:148:3: warning: data argument
+      not used by format string [-Wformat-extra-args]
+                WARN(("read header short"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+3 warnings generated.
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:287:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("lseek phdr"));
+                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:292:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:297:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:332:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("lseek text"));
+                                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:337:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text error"));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:342:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text"));
+                                ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:384:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("lseek section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:393:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:398:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:418:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:424:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:430:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:437:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:443:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:493:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("lseek symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:498:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:503:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:520:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek note"));
+                                        ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:525:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read note"));
+                                        ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+19 warnings generated.
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:287:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("lseek phdr"));
+                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:292:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:297:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:332:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("lseek text"));
+                                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:337:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text error"));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:342:5: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text"));
+                                ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:384:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("lseek section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:393:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:398:4: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:418:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:424:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:430:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:437:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:443:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:493:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("lseek symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:498:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:503:7: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:520:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek note"));
+                                        ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/boot/biosboot/../../../../../lib/libsa/loadfile_elf32.c:525:6: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read note"));
+                                        ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/boot/biosboot/x86/loadfile_machdep.h:47:9: note: expanded from macro 'WARN'
+                                    strerror(errno)))
+                                    ^
+19 warnings generated.
+/usr/src/sys/arch/i386/stand/lib/biosdisk.c:241:22: warning: implicit declaration of function 'crc32' is
+      invalid in C99 [-Wimplicit-function-declaration]
+        gpth.hdr_crc_self = crc32(0, (const void *)&gpth, GPT_HDR_SIZE);
+                            ^
+1 warning generated.
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile.c:100:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("open %s", fname ? fname : "<default>"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile.c:144:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read header failed"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile.c:148:3: warning: data
+      argument not used by format string [-Wformat-extra-args]
+                WARN(("read header short"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+3 warnings generated.
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:287:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("lseek phdr"));
+                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:292:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:297:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:332:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("lseek text"));
+                                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:337:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text error"));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:342:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text"));
+                                ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:384:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("lseek section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:393:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:398:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:418:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:424:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:430:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:437:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:443:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:493:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("lseek symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:498:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:503:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:520:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek note"));
+                                        ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:525:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read note"));
+                                        ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+19 warnings generated.
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:287:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("lseek phdr"));
+                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:292:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:297:3: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                WARN(("read program headers"));
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:332:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("lseek text"));
+                                ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:337:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text error"));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:342:5: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                WARN(("read text"));
+                                ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:384:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("lseek section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:393:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:398:4: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                        WARN(("read section headers"));
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:418:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:424:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:430:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:437:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:443:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read symbols"));
+                                        ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:493:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("lseek symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:498:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:503:7: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                                WARN(("read symbols"));
+                                                ^~~~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:520:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("lseek note"));
+                                        ^~~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+In file included from /usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf64.c:40:
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/../../../../../lib/libsa/loadfile_elf32.c:525:6: warning: 
+      data argument not used by format string [-Wformat-extra-args]
+                                        WARN(("read note"));
+                                        ^~~~~~~~~~~~~~~~~~~
+/usr/src/sys/arch/i386/stand/bootxx/bootxx_minixfs3/x86/loadfile_machdep.h:47:9: note: expanded from macro
+      'WARN'
+                                    strerror(errno)))
+                                    ^
+19 warnings generated.
+eval: cannot open /etc/hosts: no such file or directory
+diff: /etc/hosts: no such file or directory
+db: not found
+find: -user: _rwhod: no such user
+hostname: not found
+git: not found
+# 

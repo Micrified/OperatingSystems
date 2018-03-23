@@ -52,3 +52,7 @@ Mkfile.old
 dkms.conf
 # macOS litter.
 .DS_Store
+# Virtualbox
+*.vdi.gz
+# Ignored Folders
+shared_backup/
